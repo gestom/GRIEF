@@ -13,10 +13,10 @@ The feature and its evaluation is described in detail at European Conference on 
 The project itself depends on <i>openCV</i> and it uses the <i>openCV non-free</i> packages.
 To install the openCV-nonfree, type this in terminal:
 
--sudo add-apt-repository --yes ppa:xqms/opencv-nonfree
--sudo apt-get update 
--sudo apt-get install libopencv-nonfree-dev
--sudo install libopencv-dev package
+- sudo add-apt-repository --yes ppa:xqms/opencv-nonfree
+- sudo apt-get update 
+- sudo apt-get install libopencv-nonfree-dev
+- sudo install libopencv-dev package
 
 Moreover, it uses the <i>gnuplot</i> and <i>transfig</i> packages to draw the results.
 You can install those by:

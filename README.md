@@ -10,26 +10,26 @@ The feature and its evaluation is described in detail at European Conference on 
 
 ##GRIEF training
 
-1) running <b>./scripts/evolveGrief.sh NUMBER</b> will evolve a NUMBER generations of GRIEF 
-2) you can create your own training dataset with 12 images to train the GRIEF - see <i>training_data</i> for a reference,
-3) to reset the GRIEF to be the same as BRIEF <b>./scripts/resetGrief.sh</b>
-4) to switch to the GRIEF that was used in [[1](#references)], run <b>./scripts/restoreGrief.sh</b>
+1. running <b>./scripts/evolveGrief.sh NUMBER</b> will evolve a NUMBER generations of GRIEF 
+2. you can create your own training dataset with 12 images to train the GRIEF - see <i>training_data</i> for a reference,
+3. to reset the GRIEF to be the same as BRIEF <b>./scripts/resetGrief.sh</b>
+4. to switch to the GRIEF that was used in [[1](#references)], run <b>./scripts/restoreGrief.sh</b>
 
 Note, that the <i>grief_history</i> directory contains comparisons for the individual GRIEF generations and their fitness.
 
 ##Feature evaluation
 
 ###A quick test
-1) Go to <i>tools</i> and compile the <i>test_all</i> util: <b>cd tools/test;make test_all;cd ../..</b>,
-2) run the benchmark on the provided dataset: <b>./scripts/match.sh testing_data</b>.
-3) Show the results: <b>./scripts/draw.sh; evince rates.pdf</b>
+1. Go to <i>tools</i> and compile the <i>test_all</i> util: <b>cd tools/test;make test_all;cd ../..</b>,
+2. run the benchmark on the provided dataset: <b>./scripts/match.sh testing_data</b>.
+3. Show the results: <b>./scripts/draw.sh; evince rates.pdf</b>
 
 ###To use on own data
 
-1) prepare a dataset directory, see the <i>testing_data</i> folder for reference,
-2) select detectors and descriptors to use by editing the <i>detectors</i> and <i>descriptors</i> files in the settings directory,
-3) run <i>./scripts/match.sh NAME</i> - this performs the benchmark and populates the <i>NAME/results</i> directory
-4) run <i>./scripts/draw.sh</i>  - creates a graph with the results
+1. prepare a dataset directory, see the <i>testing_data</i> folder for reference,
+2. select detectors and descriptors to use by editing the <i>detectors</i> and <i>descriptors</i> files in the settings directory,
+3. run <i>./scripts/match.sh NAME</i> - this performs the benchmark and populates the <i>NAME/results</i> directory
+4. run <i>./scripts/draw.sh</i>  - creates a graph with the results
 
 ##Directory structure of our project
 

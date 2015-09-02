@@ -52,5 +52,6 @@ Note, that the <i>grief_history</i> directory contains comparisons for the indiv
 
 ##References
 ======
-1. T.Krajnik, P.Cristoforis, M.Nitsche, K. Kusumam, T.Duckett: <b>[Image features and seasons revisited.](http:/github.com/gestom/GRIEF/papers/GRIEF_ECMR_2015.pdf)</b> ECMR 2015.
+1. T.Krajnik, P.Cristoforis, M.Nitsche, K. Kusumam, T.Duckett: <b>[Image features and seasons revisited.](http:/github.com/gestom/GRIEF/papers/GRIEF_ECMR_2015.pdf)</b> ECMR 2015. <i>[bibtex](http:/github.com/gestom/GRIEF/papers/GRIEF_ECMR_2015.bib)</i>. 
+
 

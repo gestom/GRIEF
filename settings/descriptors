@@ -1,2 +1,5 @@
-grief   brief   root-sift
+grief     root-sift
+
+##The evaluation scripts "match.sh" and "match_all.sh" read the first line of this file to determine which features to test
+##so far, you can test these feature descriptors 
 grief   brief   root-sift  sift      surf    sift       surf       brisk orb surf

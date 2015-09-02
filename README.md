@@ -8,6 +8,21 @@ We call this feature GRIEF (Generated BRIEF).
 Moreover, we provide a simple framework that allows to benchmark the feature extractors.
 The feature and its evaluation is described in detail at European Conference on Mobile robotics [[1](#references)]. 
 
+##Dependencies
+
+The project itself depends on <i>openCV</i> and it uses the <i>openCV non-free</i> packages.
+To install the openCV-nonfree, type this in terminal:
+
+-sudo add-apt-repository --yes ppa:xqms/opencv-nonfree
+-sudo apt-get update 
+-sudo apt-get install libopencv-nonfree-dev
+-sudo install libopencv-dev package
+
+Moreover, it uses the <i>gnuplot</i> and <i>transfig</i> packages to draw the results.
+You can install those by:
+
+- sudo apt-get install gnuplot xfig transfig 
+
 ##GRIEF training
 
 1. running <b>./scripts/evolveGrief.sh NUMBER</b> will evolve a NUMBER generations of GRIEF 

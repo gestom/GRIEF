@@ -1,5 +1,4 @@
-star	up-sift     
-star	star    
+up-sift  up-surf norm-sift  norm-surf  brisk orb star fast mser
 
 ##The evaluation scripts "match.sh" and "match_all.sh" read the first line of this file to determine which features to test
 ##so far, you can test these feature detectors 

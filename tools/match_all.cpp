@@ -33,7 +33,7 @@ bool hist2D = false;
 int difference = 0;
 FILE *output = NULL;
 int maxFeatures=1600;
-int minFeatures=0;
+int minFeatures=1599;
 int numFeatures=maxFeatures;
 
 
@@ -234,28 +234,13 @@ int initializeDateset()
 		while (feof(file) == 0)
 		{
 			fscanf(file,"%i\t%i\n",&dum1,&dum2);
-			offsetX[i*numTests+dum3] = dum1;
-			offsetY[i*numTests+dum3] = dum2;
+			offsetX[i*numTests+dum3] = -dum1;
+			offsetY[i*numTests+dum3] = -dum2;
 			dum3++;
 		}
 		fclose(file);
 	}
 }
-
-/*class FASTDetector:FeatureDetector
-{
-public:
-  FASTDetector(int thr){thre = thr;}
-  ~FASTDetector();
-private:
-  int thre;
-public:
-  void detectImpl(const Mat& image, vector<KeyPoint>& keypoints, int threshold)
-  {
-	  FAST(image,keypoints,thre);
-  }
-};*/
-
 
 /*initialize detector*/
 int initializeDetector(char *nameI)
@@ -265,6 +250,7 @@ int initializeDetector(char *nameI)
 	/*modifiers*/
 	if (strncmp("up-",name,3)==0)	{upright = true;strcpy(name,&nameI[3]);}
 	if (strncmp("norm-",name,5)==0)	{upright = false;strcpy(name,&nameI[5]);}
+
 	/*detectors*/
 	if (strcmp("sift",  name)==0)  	detector = new SIFT(0,3,0.0,10,1.6);
 	if (strcmp("surf",  name)==0)  	detector = new SURF(0);
@@ -272,7 +258,10 @@ int initializeDetector(char *nameI)
 	if (strcmp("brisk", name)==0) 	detector = new BRISK(0,4);
 	if (strcmp("orb",   name)==0) 	detector = new OrbFeatureDetector(maxFeatures,1.2f,8,31,0,2,0,31); 
 	if (strcmp("fast",  name)==0)	detector = new FastFeatureDetector(0,true);
+
+	/*new ones*/
 	if (strcmp("mser",  name)==0)	detector = new MSER(2);
+	if (strcmp("gftt",  name)==0)	detector = new GFTTDetector(1600,0.01,1,3,false,0.04);
 }
 
 /*initialize detector*/
@@ -289,6 +278,9 @@ int initializeDescriptor(char *nameI)
 	if (strcmp("brief", name)==0)   {norm2=false;descriptor = new BriefDescriptorExtractor(32);}
 	if (strcmp("grief", name)==0)   {norm2=false;descriptor = new GriefDescriptorExtractor(32);}
 	if (strcmp("orb",   name)==0)   {norm2=false;descriptor = new OrbFeatureDetector(maxFeatures,1.2f,8,31,0,2,0,31);} 
+
+//	if (strcmp("freak",  name)==0)	detector = new FREAK(bool orientationNormalized=true, bool scaleNormalized=true, float patternScale=22.0f, int nOctaves=4, const vector<int>& selectedPairs=vector<int>() ) ;
+	if (strcmp("freak",  name)==0)	descriptor = new FREAK();
 }
 
 int main(int argc, char ** argv) 
@@ -348,181 +340,186 @@ int main(int argc, char ** argv)
 
 		for (int nFeatures=maxFeatures;nFeatures>minFeatures;nFeatures-=100)
 		{
-			Mat descriptors1,descriptors2;
-			vector<KeyPoint> keypoints1,keypoints2;
-			descriptors1 = descriptors[0];
-			descriptors2 = descriptors[1];
-			keypoints1 = keypoints[0];	
-			keypoints2 = keypoints[1];	
-			numFeatures = nFeatures;
-			int numRemove = max(0,descriptors1.rows-numFeatures); 
-			descriptors1.pop_back(numRemove);
-			numRemove = max(0,descriptors2.rows-numFeatures); 
-			descriptors2.pop_back(numRemove);
-			time2 = time1 = getTime();
-			vector<DMatch> matches, inliers_matches;
-			int sumDev,auxMax,histMax;
-			sumDev = auxMax = histMax = 0;
+			for (int a=0;a<seasons;a++){
+				for (int b=a+1;b<seasons;b++){
 
-			// matching descriptors
-			time3 = getTime();
-			matches.clear();
-			inliers_matches.clear();
-			if (descriptors1.rows*descriptors2.rows > 0) distinctiveMatch(descriptors1, descriptors2, matches, norm2, CROSSCHECK);
-			time4 = getTime();
+					Mat descriptors1,descriptors2;
+					vector<KeyPoint> keypoints1,keypoints2;
+					descriptors1 = descriptors[a];
+					descriptors2 = descriptors[b];
+					keypoints1 = keypoints[a];	
+					keypoints2 = keypoints[b];	
+					numFeatures = nFeatures;
+					int numRemove = max(0,descriptors1.rows-numFeatures); 
+					descriptors1.pop_back(numRemove);
+					numRemove = max(0,descriptors2.rows-numFeatures); 
+					descriptors2.pop_back(numRemove);
+					time2 = time1 = getTime();
+					vector<DMatch> matches, inliers_matches;
+					int sumDev,auxMax,histMax;
+					sumDev = auxMax = histMax = 0;
 
-			if (matches.size() > 0){
+					// matching descriptors
+					time3 = getTime();
+					matches.clear();
+					inliers_matches.clear();
+					if (descriptors1.rows*descriptors2.rows > 0) distinctiveMatch(descriptors1, descriptors2, matches, norm2, CROSSCHECK);
+					time4 = getTime();
 
-				//histogram assembly
+					if (matches.size() > 0){
 
-				if (hist2D){
-					int iX = 0;
-					int iY = 0;
+						//histogram assembly
 
-					for(int i = 0; i < width*2+granularity; i++ )
+						if (hist2D){
+							int iX = 0;
+							int iY = 0;
+
+							for(int i = 0; i < width*2+granularity; i++ )
+							{
+								for(int j = 0; j < height*2+granularity; j++ ) histogram2D[i][j]=0;
+							}
+
+							//create the histogram
+							for(size_t i = 0; i < matches.size(); i++ )
+							{
+								int i1 = matches[i].queryIdx;
+								int i2 = matches[i].trainIdx;
+								int iXO = (int)(keypoints1[i1].pt.x-keypoints2[i2].pt.x + width);
+								int iYO = (int)(keypoints1[i1].pt.y-keypoints2[i2].pt.y + height);
+								for(int ii = 0; ii < granularity; ii++ ){
+									for(int ij = 0; ij < granularity; ij++ ){
+										iX = iXO+ii;
+										iY = iYO+ij;
+										if (iX > -1 && iX < width*2 && iY > -1 && iY < height*2) histogram2D[iX][iY]++;
+									}
+								}
+							}
+
+							//find histogram maximum
+							int index = 0;
+							histMax = 0;
+							for (int i = 0;i<width*2;i++){
+								for (int j = 0;j<height*2;j++){
+									if (histMax < histogram2D[i][j]){
+										histMax = histogram2D[i][j];
+										iX = i;
+										iY = j;
+									}
+								}
+							}
+							sumDev = iX-width-granularity/2;
+							sumDev = sumDev*histMax;
+							auxMax = 0;
+						}else{
+							//histogram assembly
+							int numBins = 100; 
+							int histogram[numBins];
+							int bestHistogram[numBins];
+							memset(bestHistogram,0,sizeof(int)*numBins);
+							histMax = 0;
+							int maxS,domDir;
+							for (int s = 0;s<granularity;s++){
+								memset(histogram,0,sizeof(int)*numBins);
+								for( size_t i = 0; i < matches.size(); i++ )
+								{
+									int i1 = matches[i].queryIdx;
+									int i2 = matches[i].trainIdx;
+									if ((fabs(keypoints1[i1].pt.y-keypoints2[i2].pt.y))<VERTICAL_LIMIT){
+										int devx = (int)(keypoints1[i1].pt.x-keypoints2[i2].pt.x + numBins/2*granularity);
+										int index = (devx+s)/granularity;
+										if (index > -1 && index < numBins) histogram[index]++;
+									}
+								}
+								for (int i = 0;i<numBins;i++){
+									if (histMax < histogram[i]){
+										histMax = histogram[i];
+										maxS = s;
+										domDir = i;
+										memcpy(bestHistogram,histogram,sizeof(int)*numBins);
+									}
+								}
+							}
+
+							auxMax=0;
+							for (int i =0;i<numBins;i++){
+								if (auxMax < bestHistogram[i] && bestHistogram[i] != histMax){
+									auxMax = bestHistogram[i];
+								}
+							}
+
+							sumDev = 0;
+							for( size_t i = 0; i < matches.size(); i++ ){
+								int i1 = matches[i].queryIdx;
+								int i2 = matches[i].trainIdx;
+
+								if ((int)((keypoints1[i1].pt.x-keypoints2[i2].pt.x + numBins/2*granularity+maxS)/granularity) == domDir && fabs(keypoints1[i1].pt.y-keypoints2[i2].pt.y)<VERTICAL_LIMIT)
+								{
+									sumDev += keypoints1[i1].pt.x-keypoints2[i2].pt.x;
+									inliers_matches.push_back(matches[i]);
+								}
+							}
+							//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
+
+						}
+						if (histMax > 0) difference = (sumDev/histMax)-(offsetX[ims+numTests]-offsetX[ims]); else difference = 1000;
+						//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
+						//if (histMax > 0) printf("%05i %05i %i %i %i %i %i\n",imNum1,imNum2,difference,-(sumDev/histMax),-offsetX[ims],histMax,auxMax); else printf("%05i %05i 1000 1000 %i 0 0\n",imNum1,imNum2,offsetX[ims]);
+						if (drawAll==false && update) draw = (abs(difference) > 35); else draw = drawAll;
+						//if (update && draw == false) fprintf(output,"Offset %i %i %i %i\n",imNum1,imNum2,offsetX[ims],offsetY[ims]);
+						//if (histMax > 0) fprintf(output,"%05i %05i %i %i %i %i %i\n",imNum1,imNum2,-(sumDev/histMax)+offset[ims],-(sumDev/histMax),-offset[ims],histMax,auxMax); else fprintf(output,"%05i %05i 1000 1000 %i 0 0\n",imNum1,imNum2,offset[ims]);
+					}else{
+						difference = 1000;
+						printf("%05i %05i 1000 1000 %i 0 0\n",ims,ims,offsetX[ims]);
+						draw = update;
+					}
+					if (fabs(difference) > 35){
+						numFails[numFeatures/100]++;
+					}
+					if (draw)
 					{
-						for(int j = 0; j < height*2+granularity; j++ ) histogram2D[i][j]=0;
-					}
-
-					//create the histogram
-					for(size_t i = 0; i < matches.size(); i++ )
-					{
-						int i1 = matches[i].queryIdx;
-						int i2 = matches[i].trainIdx;
-						int iXO = (int)(keypoints1[i1].pt.x-keypoints2[i2].pt.x + width);
-						int iYO = (int)(keypoints1[i1].pt.y-keypoints2[i2].pt.y + height);
-						for(int ii = 0; ii < granularity; ii++ ){
-							for(int ij = 0; ij < granularity; ij++ ){
-								iX = iXO+ii;
-								iY = iYO+ij;
-								if (iX > -1 && iX < width*2 && iY > -1 && iY < height*2) histogram2D[iX][iY]++;
-							}
+						Mat imA,imB,img_matches,img_matches_transposed;
+						vector<KeyPoint> kpA,kpB;
+						KeyPoint kp;
+						kpA.clear();
+						kpB.clear();
+						for (int s=0;s<keypoints1.size();s++){
+							kp = keypoints1[s];
+							kp.pt.x = keypoints1[s].pt.y;
+							kp.pt.y = keypoints1[s].pt.x;
+							kpA.push_back(kp);
 						}
-					}
-
-					//find histogram maximum
-					int index = 0;
-					histMax = 0;
-					for (int i = 0;i<width*2;i++){
-						for (int j = 0;j<height*2;j++){
-							if (histMax < histogram2D[i][j]){
-								histMax = histogram2D[i][j];
-								iX = i;
-								iY = j;
-							}
+						for (int s=0;s<keypoints2.size();s++){
+							kp = keypoints2[s];
+							kp.pt.x = keypoints2[s].pt.y;
+							kp.pt.y = keypoints2[s].pt.x;
+							kpB.push_back(kp);
 						}
-					}
-					sumDev = iX-width-granularity/2;
-					sumDev = sumDev*histMax;
-					auxMax = 0;
-				}else{
-					//histogram assembly
-					int numBins = 100; 
-					int histogram[numBins];
-					int bestHistogram[numBins];
-					memset(bestHistogram,0,sizeof(int)*numBins);
-					histMax = 0;
-					int maxS,domDir;
-					for (int s = 0;s<granularity;s++){
-						memset(histogram,0,sizeof(int)*numBins);
-						for( size_t i = 0; i < matches.size(); i++ )
-						{
-							int i1 = matches[i].queryIdx;
-							int i2 = matches[i].trainIdx;
-							if ((fabs(keypoints1[i1].pt.y-keypoints2[i2].pt.y))<VERTICAL_LIMIT){
-								int devx = (int)(keypoints1[i1].pt.x-keypoints2[i2].pt.x + numBins/2*granularity);
-								int index = (devx+s)/granularity;
-								if (index > -1 && index < numBins) histogram[index]++;
-							}
+						cv::transpose(im[a], imA);
+						cv::transpose(im[b], imB);
+						namedWindow("matches", 1);
+						if (kpA.size() >0 && kpB.size()>0 && inliers_matches.size() >0){
+							drawMatches(imA, kpA, imB, kpB, inliers_matches, img_matches, Scalar(0, 0, 255), Scalar(0, 0, 255), vector<char>(), 0);
+						}else{
+							kpA.push_back(kp);
+							kpB.push_back(kp);
+							drawMatches(imA, kpA, imB, kpB, matches, img_matches, Scalar(0, 0, 255), Scalar(0, 0, 255), vector<char>(), 0);
 						}
-						for (int i = 0;i<numBins;i++){
-							if (histMax < histogram[i]){
-								histMax = histogram[i];
-								maxS = s;
-								domDir = i;
-								memcpy(bestHistogram,histogram,sizeof(int)*numBins);
-							}
-						}
+						cv::transpose(img_matches,img_matches_transposed);
+						imshow("matches", img_matches_transposed);
+						waitKey(0);
 					}
-
-					auxMax=0;
-					for (int i =0;i<numBins;i++){
-						if (auxMax < bestHistogram[i] && bestHistogram[i] != histMax){
-							auxMax = bestHistogram[i];
-						}
-					}
-
-					sumDev = 0;
-					for( size_t i = 0; i < matches.size(); i++ ){
-						int i1 = matches[i].queryIdx;
-						int i2 = matches[i].trainIdx;
-
-						if ((int)((keypoints1[i1].pt.x-keypoints2[i2].pt.x + numBins/2*granularity+maxS)/granularity) == domDir && fabs(keypoints1[i1].pt.y-keypoints2[i2].pt.y)<VERTICAL_LIMIT)
-						{
-							sumDev += keypoints1[i1].pt.x-keypoints2[i2].pt.x;
-							inliers_matches.push_back(matches[i]);
-						}
-					}
-					//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
-
+					printf("Season %02i vs %02i, features %04i of %04i, location %03i of %03i \n",a,b,nFeatures,maxFeatures,ims+1,numTests);
 				}
-				if (histMax > 0) difference = (sumDev/histMax)-(offsetX[ims+numTests]-offsetX[ims]); else difference = 1000;
-				//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
-				//if (histMax > 0) printf("%05i %05i %i %i %i %i %i\n",imNum1,imNum2,difference,-(sumDev/histMax),-offsetX[ims],histMax,auxMax); else printf("%05i %05i 1000 1000 %i 0 0\n",imNum1,imNum2,offsetX[ims]);
-				if (drawAll==false && update) draw = (abs(difference) > 35); else draw = drawAll;
-				//if (update && draw == false) fprintf(output,"Offset %i %i %i %i\n",imNum1,imNum2,offsetX[ims],offsetY[ims]);
-				//if (histMax > 0) fprintf(output,"%05i %05i %i %i %i %i %i\n",imNum1,imNum2,-(sumDev/histMax)+offset[ims],-(sumDev/histMax),-offset[ims],histMax,auxMax); else fprintf(output,"%05i %05i 1000 1000 %i 0 0\n",imNum1,imNum2,offset[ims]);
-			}else{
-				difference = 1000;
-				printf("%05i %05i 1000 1000 %i 0 0\n",ims,ims,offsetX[ims]);
-				draw = update;
-			}
-			if (fabs(difference) > 35){
-				numFails[numFeatures/100]++;
-			}
-			if (draw)
-			{
-				Mat imA,imB,img_matches,img_matches_transposed;
-				vector<KeyPoint> kpA,kpB;
-				KeyPoint kp;
-				kpA.clear();
-				kpB.clear();
-				for (int s=0;s<keypoints1.size();s++){
-					kp = keypoints1[s];
-					kp.pt.x = keypoints1[s].pt.y;
-					kp.pt.y = keypoints1[s].pt.x;
-					kpA.push_back(kp);
-				}
-				for (int s=0;s<keypoints2.size();s++){
-					kp = keypoints2[s];
-					kp.pt.x = keypoints2[s].pt.y;
-					kp.pt.y = keypoints2[s].pt.x;
-					kpB.push_back(kp);
-				}
-				cv::transpose(im[0], imA);
-				cv::transpose(im[1], imB);
-				namedWindow("matches", 1);
-				if (kpA.size() >0 && kpB.size()>0 && inliers_matches.size() >0){
-					drawMatches(imA, kpA, imB, kpB, matches, img_matches, Scalar(0, 0, 255), Scalar(0, 0, 255), vector<char>(), 0);
-				}else{
-					kpA.push_back(kp);
-					kpB.push_back(kp);
-					drawMatches(imA, kpA, imB, kpB, inliers_matches, img_matches, Scalar(0, 0, 255), Scalar(0, 0, 255), vector<char>(), 0);
-				}
-				cv::transpose(img_matches,img_matches_transposed);
-				imshow("matches", img_matches_transposed);
-				waitKey(0);
 			}
 		}
-		printf("Test %i of %i \n",ims+1,numTests);
 	}
 	if (update) fclose(output);
 
-	numFails[0] = numTests;
+	numFails[0] = numTests*seasons*(seasons-1)/2;
 	char report[100];
 	sprintf(report,"%s/results/%s_%s.histogram",dataset,detectorName,descriptorName);
 	FILE* summary = fopen(report,"w+");
-	for (int n=0;n<=maxFeatures/100;n++) fprintf(summary,"%02i %.4f\n",n,100.0*numFails[n]/numTests);
+	for (int n=0;n<=maxFeatures/100;n++) fprintf(summary,"%02i %.4f\n",n,100.0*numFails[n]/numFails[0]);
 	fclose(summary);
 	delete seq1;
 	delete seq2;

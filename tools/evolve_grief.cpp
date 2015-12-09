@@ -70,8 +70,10 @@ int generateNew()
 		{
 			x1[i] = rand()%xWindow-xWindow/2;
 			y1[i] = rand()%yWindow-yWindow/2;
-			x2[i] = rand()%xWindow-xWindow/2;
-			y2[i] = rand()%yWindow-yWindow/2;
+			//x2[i] = rand()%xWindow-xWindow/2;
+			//y2[i] = rand()%yWindow-yWindow/2;
+			x2[i] = rand()%2;
+			y2[i] = rand()%2;
 			i = griefDescriptorLength;
 		}
 	}
@@ -81,8 +83,10 @@ int generateNew()
 		int id = griefRating[i].id;
 		x1[id] = rand()%xWindow-xWindow/2;
 		y1[id] = rand()%yWindow-yWindow/2;
-		x2[id] = rand()%xWindow-xWindow/2;
-		y2[id] = rand()%yWindow-yWindow/2;
+		//x2[i] = rand()%xWindow-xWindow/2;
+		//y2[i] = rand()%yWindow-yWindow/2;
+		x2[id] = rand()%2;
+		y2[id] = rand()%2;
 	}
 
 	/*
@@ -360,7 +364,7 @@ int main(int argc, char ** argv)
 						inliers_matches.push_back(matches[i]);
 						eff = -1;
 					}else{
-						eff = 1;
+						eff = +1;
 					}
 					for (int o = 0;o<griefDescriptorLength/8;o++){
 						unsigned char b = descriptors[ik].at<uchar>(i1,o)^descriptors[jk].at<uchar>(i2,o);

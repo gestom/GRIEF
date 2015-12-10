@@ -461,7 +461,7 @@ int main(int argc, char ** argv)
 							//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
 
 						}
-						if (histMax > 0) difference = (sumDev/histMax)-(offsetX[ims+numTests]-offsetX[ims]); else difference = 1000;
+						if (histMax > 0) difference = (sumDev/histMax)+(offsetX[ims+numTests*a]-offsetX[ims+numTests*b]); else difference = 1000;
 						//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
 						//if (histMax > 0) printf("%05i %05i %i %i %i %i %i\n",imNum1,imNum2,difference,-(sumDev/histMax),-offsetX[ims],histMax,auxMax); else printf("%05i %05i 1000 1000 %i 0 0\n",imNum1,imNum2,offsetX[ims]);
 						if (drawAll==false && update) draw = (abs(difference) > 35); else draw = drawAll;
@@ -472,9 +472,8 @@ int main(int argc, char ** argv)
 						printf("%05i %05i 1000 1000 %i 0 0\n",ims,ims,offsetX[ims]);
 						draw = update;
 					}
-					if (fabs(difference) > 35){
-						numFails[numFeatures/100]++;
-					}
+					printf("DIFFERENCE %i %i \n",(sumDev/histMax),(offsetX[ims+numTests*a]-offsetX[ims+numTests*b]));
+					if (fabs(difference) > 35) numFails[numFeatures/100]++;
 					if (draw)
 					{
 						Mat imA,imB,img_matches,img_matches_transposed;

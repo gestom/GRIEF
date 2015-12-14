@@ -33,11 +33,12 @@ bool hist2D = false;
 int difference = 0;
 FILE *output = NULL;
 int maxFeatures=1600;
-int minFeatures=1599;
+int minFeatures=99;
 int numFeatures=maxFeatures;
 
 
 int numFails[1600/100+1];
+int numFeats[1600/100+1];
 char season[1000][1000]; 
 int seasons = 0;
 char dataset[1000];
@@ -182,7 +183,8 @@ int initializeDateset()
 		fprintf(stderr,"Dataset directory not found\n");
 		return -1;
 	}
-
+	for (int i=0;i<seasons;i++)sprintf(season[i],"season_%02i",i);
+	for (int i=0;i<seasons;i++)printf("Season ordered %i %s \n",i,season[i]);
 	/*are there at least two?*/
 	if (seasons < 2)
 	{
@@ -296,6 +298,7 @@ int main(int argc, char ** argv)
 	if (update) output = fopen("newcon.txt","w+");
 	distance_factor = 1.0;
 	memset(numFails,0,(maxFeatures/100+1)*sizeof(int));	
+	memset(numFeats,0,(maxFeatures/100+1)*sizeof(int));	
 
 	for (int ims=0;ims<numTests;ims++)
 	{
@@ -358,6 +361,7 @@ int main(int argc, char ** argv)
 					vector<DMatch> matches, inliers_matches;
 					int sumDev,auxMax,histMax;
 					sumDev = auxMax = histMax = 0;
+					numFeats[numFeatures/100]=(descriptors1.rows+descriptors2.rows)/2;
 
 					// matching descriptors
 					time3 = getTime();
@@ -472,10 +476,10 @@ int main(int argc, char ** argv)
 						printf("%05i %05i 1000 1000 %i 0 0\n",ims,ims,offsetX[ims]);
 						draw = update;
 					}
-					printf("DIFFERENCE %i %i \n",(sumDev/histMax),(offsetX[ims+numTests*a]-offsetX[ims+numTests*b]));
 					if (fabs(difference) > 35) numFails[numFeatures/100]++;
 					if (draw)
 					{
+						printf("DIFF: %i %i\n",(sumDev/histMax),-(offsetX[ims+numTests*a]-offsetX[ims+numTests*b]));
 						Mat imA,imB,img_matches,img_matches_transposed;
 						vector<KeyPoint> kpA,kpB;
 						KeyPoint kp;
@@ -515,10 +519,11 @@ int main(int argc, char ** argv)
 	if (update) fclose(output);
 
 	numFails[0] = numTests*seasons*(seasons-1)/2;
+	numFeats[0] = numTests*seasons*(seasons-1)/2;
 	char report[100];
 	sprintf(report,"%s/results/%s_%s.histogram",dataset,detectorName,descriptorName);
 	FILE* summary = fopen(report,"w+");
-	for (int n=0;n<=maxFeatures/100;n++) fprintf(summary,"%02i %.4f\n",n,100.0*numFails[n]/numFails[0]);
+	for (int n=0;n<=maxFeatures/100;n++) fprintf(summary,"%02i %.4f %04i\n",n,100.0*numFails[n]/numFails[0],numFeats[n]);
 	fclose(summary);
 	delete seq1;
 	delete seq2;

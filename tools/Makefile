@@ -18,6 +18,9 @@ match_all: match_all.cpp
 evolve_grief: evolve_grief.cpp
 	$(CC) evolve_grief.cpp $(FLAGS) $(LDFLAGS) -o $@
  
+annotate: match_all.cpp
+	$(CC) annotate.cpp $(FLAGS) $(LDFLAGS) -o $@ 
+
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE) 
 

@@ -32,10 +32,9 @@ int histogram2D[width*2+granularity][height*2+granularity];
 bool hist2D = false;
 int difference = 0;
 FILE *output = NULL;
-int maxFeatures=0*1600;
-int minFeatures=0*1599;
+int maxFeatures=1600;
+int minFeatures=99;
 int numFeatures=maxFeatures;
-
 
 int numFails[1600/100+1];
 int numFeats[1600/100+1];
@@ -156,7 +155,7 @@ int *seq1;
 int *seq2;
 int *offsetX;
 int *offsetY;
-int numTests = 0;
+int numLocations = 0;
 
 void rootSift(Mat *m)
 {
@@ -232,11 +231,11 @@ int initializeDateset()
 		}
 		fclose(file);
 	}
-	numTests = dum4;
-	printf("Dataset seems to be OK: %i seasons and %i locations\n",seasons,numTests);
+	numLocations = dum4;
+	printf("Dataset seems to be OK: %i seasons and %i locations\n",seasons,numLocations);
 	/*allocate variables*/
-	offsetX = (int*)malloc(sizeof(int)*numTests*seasons);
-	offsetY = (int*)malloc(sizeof(int)*numTests*seasons);
+	offsetX = (int*)malloc(sizeof(int)*numLocations*seasons);
+	offsetY = (int*)malloc(sizeof(int)*numLocations*seasons);
 
 	/*read offsets*/
 	for (int i = 0;i<seasons;i++){
@@ -246,8 +245,8 @@ int initializeDateset()
 		while (feof(file) == 0)
 		{
 			fscanf(file,"%i\t%i\n",&dum1,&dum2);
-			offsetX[i*numTests+dum3] = -dum1;
-			offsetY[i*numTests+dum3] = -dum2;
+			offsetX[i*numLocations+dum3] = -dum1;
+			offsetY[i*numLocations+dum3] = -dum2;
 			dum3++;
 		}
 		fclose(file);
@@ -290,8 +289,6 @@ int initializeDescriptor(char *nameI)
 	if (strcmp("brief", name)==0)   {norm2=false;descriptor = new BriefDescriptorExtractor(32);}
 	if (strcmp("grief", name)==0)   {norm2=false;descriptor = new GriefDescriptorExtractor(32);}
 	if (strcmp("orb",   name)==0)   {norm2=false;descriptor = new OrbFeatureDetector(maxFeatures,1.2f,8,31,0,2,0,31);} 
-
-//	if (strcmp("freak",  name)==0)	detector = new FREAK(bool orientationNormalized=true, bool scaleNormalized=true, float patternScale=22.0f, int nOctaves=4, const vector<int>& selectedPairs=vector<int>() ) ;
 	if (strcmp("freak",  name)==0)	descriptor = new FREAK();
 }
 
@@ -309,8 +306,9 @@ int main(int argc, char ** argv)
 	distance_factor = 1.0;
 	memset(numFails,0,(maxFeatures/100+1)*sizeof(int));	
 	memset(numFeats,0,(maxFeatures/100+1)*sizeof(int));	
-	
-	for (int ims=0;ims<numTests;ims++)
+	int totalTests = 0;
+	int numPictures = 0;
+	for (int ims=0;ims<numLocations;ims++)
 	{
 		delete detector;
 		delete descriptor;
@@ -351,6 +349,7 @@ int main(int argc, char ** argv)
 			if (normalizeSift) rootSift(&descriptors[s]);	
 			timeDescription += getElapsedTime();
 			totalExtracted += descriptors[s].rows;
+			numPictures++;
 		}
 
 		for (int nFeatures=maxFeatures;nFeatures>=minFeatures;nFeatures-=100)
@@ -376,7 +375,7 @@ int main(int argc, char ** argv)
 					vector<DMatch> matches, inliers_matches;
 					int sumDev,auxMax,histMax;
 					sumDev = auxMax = histMax = 0;
-					numFeats[numFeatures/100]=(descriptors1.rows+descriptors2.rows)/2;
+					numFeats[numFeatures/100]+=(descriptors1.rows+descriptors2.rows)/2;
 
 					// matching descriptors
 					getElapsedTime();
@@ -485,7 +484,7 @@ int main(int argc, char ** argv)
 							//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
 
 						}
-						if (histMax > 0) difference = (sumDev/histMax)+(offsetX[ims+numTests*a]-offsetX[ims+numTests*b]); else difference = 1000;
+						if (histMax > 0) difference = (sumDev/histMax)+(offsetX[ims+numLocations*a]-offsetX[ims+numLocations*b]); else difference = 1000;
 						//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
 						//if (histMax > 0) printf("%05i %05i %i %i %i %i %i\n",imNum1,imNum2,difference,-(sumDev/histMax),-offsetX[ims],histMax,auxMax); else printf("%05i %05i 1000 1000 %i 0 0\n",imNum1,imNum2,offsetX[ims]);
 						if (drawAll==false && update) draw = (abs(difference) > 35); else draw = drawAll;
@@ -497,9 +496,9 @@ int main(int argc, char ** argv)
 						draw = update;
 					}
 					if (fabs(difference) > 35) numFails[numFeatures/100]++;
-					if (draw)
+					if (draw&&(fabs(difference) > 35))
 					{
-						printf("DIFF: %i %i\n",(sumDev/histMax),-(offsetX[ims+numTests*a]-offsetX[ims+numTests*b]));
+						printf("DIFF: %i %i\n",(sumDev/histMax),-(offsetX[ims+numLocations*a]-offsetX[ims+numLocations*b]));
 						Mat imA,imB,img_matches,img_matches_transposed;
 						vector<KeyPoint> kpA,kpB;
 						KeyPoint kp;
@@ -531,17 +530,18 @@ int main(int argc, char ** argv)
 						imshow("matches", img_matches_transposed);
 						waitKey(0);
 					}
-					printf("Season %02i vs %02i, features %04i of %04i, location %03i of %03i \n",a,b,nFeatures,maxFeatures,ims+1,numTests);
+					printf("Season %02i vs %02i, features %04i of %04i, location %03i of %03i \n",a,b,nFeatures,maxFeatures,ims+1,numLocations);
+					totalTests++;
 				}
 			}
 		}
 	}
 	if (update) fclose(output);
-
+	printf("%i %i\n",totalTests,numLocations*seasons*(seasons-1)/2);
 	char report[100];
 	sprintf(report,"%s/results/%s_%s.histogram",dataset,detectorName,descriptorName);
 	FILE* summary = fopen(report,"w+");
-	for (int n=0;n<=maxFeatures/100;n++) fprintf(summary,"%02i %.4f %i %i %i %i %i %i \n",n,100.0*numFails[n]/(numTests*seasons*(seasons-1)/2),numFeats[n],timeDetection,timeDescription,timeMatching,totalExtracted,totalMatched);
+	for (int n=0;n<=maxFeatures/100;n++) fprintf(summary,"%02i %.4f Detections: %i Times: %i %i %i Extracted: %i %i \n",n,100.0*numFails[n]/totalTests,numFeats[n]/totalTests,timeDetection/numPictures,timeDescription/numPictures,timeMatching/totalTests,totalExtracted/numPictures,totalMatched/totalTests);
 	fclose(summary);
 	delete seq1;
 	delete seq2;

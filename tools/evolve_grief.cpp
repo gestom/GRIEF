@@ -12,7 +12,10 @@
 #define VERTICAL_LIMIT 100
 #define MAX_SEASONS 100
 #define MAX_LOCATIONS 1000
+<<<<<<< HEAD
 #define WINDOW_SIZE 48 
+=======
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 
 int runs = 0;
 bool save=false;
@@ -179,8 +182,16 @@ int main(int argc, char ** argv)
 	int detectorThreshold = 0;
 	distance_factor = 1.0;
 	// process command line args
+<<<<<<< HEAD
 	if (argc > 2 && strcmp(argv[2],"draw")==0) draw = true;
 	if (argc > 2 && strcmp(argv[2],"save")==0) save = true;
+=======
+	if(argc != 4 && argc != 5){
+		return -1;
+	}
+	if (argc > 4 && strcmp(argv[4],"draw")==0) draw = true;
+	if (argc > 4 && strcmp(argv[4],"save")==0) save = true;
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 
 	char filename[100];
 	int numSeasons = 0;
@@ -212,6 +223,7 @@ int main(int argc, char ** argv)
 		printf("WARNING: Dataset is annotated only partially (check if the ""displacements.txt"" files exist in every ""season_nn"" directory). Ignoring hand annotation data.\n");
 	}
 	supervised = (numDisplacements == numSeasons);
+<<<<<<< HEAD
 
 	/*check the number of locations*/
 	do{
@@ -221,6 +233,17 @@ int main(int argc, char ** argv)
 	numLocations--;
 	printf("Dataset: %ix%i images from %i seasons and %i places, annotated %i, loadTime %i\n",x,y,numSeasons,numLocations,numDisplacements,getTime()-timer);
 
+=======
+
+	/*check the number of locations*/
+	do{
+		sprintf(filename,"%s/season_%02i/%09i.bmp",argv[1],0,numLocations++);
+		tmpIm =  imread(filename, CV_LOAD_IMAGE_COLOR);
+	}while (numLocations < MAX_LOCATIONS && tmpIm.data != NULL);
+	numLocations--;
+	printf("Dataset: %ix%i images from %i seasons and %i places, annotated %i, loadTime %i\n",x,y,numSeasons,numLocations,numDisplacements,getTime()-timer);
+
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 	int offsetX[numSeasons*numLocations];
 	int offsetY[numSeasons*numLocations];
 
@@ -259,6 +282,7 @@ int main(int argc, char ** argv)
 	}
 	printf("Dataset consistency check OK. Time %i ms.\n",getTime()-timer);
 
+<<<<<<< HEAD
 
 	Mat im[numSeasons];
 	Mat img[numSeasons];
@@ -266,6 +290,15 @@ int main(int argc, char ** argv)
 	global = global*0;
 	Mat submat,griefw;
 
+=======
+
+	Mat im[numSeasons];
+	Mat img[numSeasons];
+	Mat global = Mat(51,51,CV_64F);
+	global = global*0;
+	Mat submat,griefw;
+
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 	//GRIEF evolution step 1: reset the comparison ratings
 	vector<DMatch> matches, inliers_matches,working_matches;
 	int matcher = 0;
@@ -293,8 +326,12 @@ int main(int argc, char ** argv)
 		Mat dp;
 
 		cout << "Detecting STAR features and extracting genetically modified BRIEF descriptors"  << endl;
+<<<<<<< HEAD
 		//StarFeatureDetector detector(45,detectorThreshold,10,8,5);		//TODO make this selectable
 		FastFeatureDetector detector(0,true);
+=======
+		StarFeatureDetector detector(45,detectorThreshold,10,8,5);		//TODO make this selectable
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 		GriefDescriptorExtractor extractor(griefDescriptorLength/8);
 
 		time0 = getTime();
@@ -378,10 +415,17 @@ int main(int argc, char ** argv)
 					manualDir = offsetX[location+ik*numLocations] - offsetX[location+jk*numLocations];
 					if (fabs(manualDir - histDir) > 35) matchFail = true; else matchFail = false;
 					float realDir = histDir;
+<<<<<<< HEAD
 					int strength = 1;
 					//if (matchFail) strength = 100;
 					if (matchFail && supervised) realDir = manualDir;
 
+=======
+					//hard negative mining
+					int strength = 1;
+					//if (matchFail) strength = 1;
+					if (matchFail && supervised) realDir = manualDir;
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 					/*rate individual comparisons*/
 					for( size_t i = 0; i < matches.size(); i++ ){
 						char eff = 0;
@@ -398,11 +442,16 @@ int main(int argc, char ** argv)
 							unsigned char b = descriptors[ik].at<uchar>(i1,o)^descriptors[jk].at<uchar>(i2,o);
 							unsigned char oo = 128;
 							for (int p = 0;p<8;p++){
+<<<<<<< HEAD
 								if (oo&b)  griefRating[8*o+p].value+=eff; else griefRating[8*o+p].value-=eff;
+=======
+								if (oo&b)  griefRating[8*o+p].value+=0*eff; else griefRating[8*o+p].value-=eff;
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 								oo=oo/2;
 							}
 						}
 					}
+<<<<<<< HEAD
 
 					//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
 					if (histMax > 0 || supervised) printf("%04i %02i%02i %i %i %i %i\n",location,ik+1,jk+1,histDir,manualDir,histMax,auxMax); else printf("%04i %02i%02i 1000 -1000 0 0\n",location,ik+1,jk+1);
@@ -411,6 +460,15 @@ int main(int argc, char ** argv)
 					matchFail = true;
 				}
 
+=======
+					//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
+					if (histMax > 0 || supervised) printf("%04i %02i%02i %i %i %i %i\n",location,ik+1,jk+1,histDir,manualDir,histMax,auxMax); else printf("%04i %02i%02i 1000 -1000 0 0\n",location,ik+1,jk+1);
+				}else{
+					printf("%04i %02i%02i 1000 -1000 0 0\n",location,ik+1,jk+1);
+					matchFail = true;
+				}
+
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 				/*double minVal; 
 				double maxVal; 
 				Point minLoc; 

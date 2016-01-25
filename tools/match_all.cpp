@@ -33,7 +33,11 @@ bool hist2D = false;
 int difference = 0;
 FILE *output = NULL;
 int maxFeatures=1600;
+<<<<<<< HEAD
 int minFeatures=99;
+=======
+int minFeatures=1599;
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 int numFeatures=maxFeatures;
 
 int numFails[1600/100+1];
@@ -44,27 +48,17 @@ char dataset[1000];
 char descriptorName[1000];
 char detectorName[1000];
 
+int time0,time1,time2,time3,time4,time5,time6;
+
 FeatureDetector     *detector = NULL;
 DescriptorExtractor *descriptor = NULL;
 
-/*benchmarking time*/
-int timeDetection = 0;
-int timeDescription = 0;
-int timeMatching = 0;
-int totalExtracted = 0;
-int totalMatched = 0;
-
-
 /*for benchmarking purposes*/
-int getElapsedTime()
+int getTime()
 {
-  static int lastTime;
   struct  timeval currentTime;
   gettimeofday(&currentTime, NULL);
-  int timeNow = currentTime.tv_sec*1000 + currentTime.tv_usec/1000;
-  int result = timeNow - lastTime;
-  lastTime = timeNow; 
-  return result; 
+  return currentTime.tv_sec*1000 + currentTime.tv_usec/1000;
 }
 
 /*to select most responsive features*/
@@ -180,7 +174,7 @@ int initializeDateset()
 	dpdf = opendir(dataset);
 	if (dpdf != NULL)
 	{
-		while (epdf = readdir(dpdf))
+		while ((epdf = readdir(dpdf)))
 		{
 			if (strncmp(epdf->d_name,"season_",7)==0 && epdf->d_type == 4)
 			{
@@ -244,13 +238,20 @@ int initializeDateset()
 		dum3 = 0;
 		while (feof(file) == 0)
 		{
+<<<<<<< HEAD
 			fscanf(file,"%i\t%i\n",&dum1,&dum2);
 			offsetX[i*numLocations+dum3] = -dum1;
 			offsetY[i*numLocations+dum3] = -dum2;
+=======
+			dum4 = fscanf(file,"%i\t%i\n",&dum1,&dum2);
+			offsetX[i*numTests+dum3] = -dum1;
+			offsetY[i*numTests+dum3] = -dum2;
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 			dum3++;
 		}
 		fclose(file);
 	}
+	return 0;
 }
 
 /*initialize detector*/
@@ -273,6 +274,7 @@ int initializeDetector(char *nameI)
 	/*new ones*/
 	if (strcmp("mser",  name)==0)	detector = new MSER(2);
 	if (strcmp("gftt",  name)==0)	detector = new GFTTDetector(1600,0.01,1,3,false,0.04);
+	return 0;
 }
 
 /*initialize detector*/
@@ -290,6 +292,7 @@ int initializeDescriptor(char *nameI)
 	if (strcmp("grief", name)==0)   {norm2=false;descriptor = new GriefDescriptorExtractor(32);}
 	if (strcmp("orb",   name)==0)   {norm2=false;descriptor = new OrbFeatureDetector(maxFeatures,1.2f,8,31,0,2,0,31);} 
 	if (strcmp("freak",  name)==0)	descriptor = new FREAK();
+	return 0;
 }
 
 int main(int argc, char ** argv) 
@@ -306,9 +309,14 @@ int main(int argc, char ** argv)
 	distance_factor = 1.0;
 	memset(numFails,0,(maxFeatures/100+1)*sizeof(int));	
 	memset(numFeats,0,(maxFeatures/100+1)*sizeof(int));	
+<<<<<<< HEAD
 	int totalTests = 0;
 	int numPictures = 0;
 	for (int ims=0;ims<numLocations;ims++)
+=======
+
+	for (int ims=0;ims<numTests;ims++)
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 	{
 		delete detector;
 		delete descriptor;
@@ -335,24 +343,27 @@ int main(int argc, char ** argv)
 
 		for (int s = 0;s<seasons;s++)
 		{
-			/*detection*/
-			getElapsedTime();
-			detector->detect(img[s], keypoints[s]);
-			timeDetection += getElapsedTime();
-
-			sort(keypoints[s].begin(),keypoints[s].end(),compare_response);
-
 			/*extraction*/
-			getElapsedTime();
-			if (upright)for (int j = 0;j<keypoints[s].size();j++) keypoints[s][j].angle = -1;
+			time0 = getTime();
+			detector->detect(img[s], keypoints[s]);
+			/*if (strcmp("mser", detectorName)==0)
+			{
+				for (int j = 0;j<keypoints[s].size();j++) keypoints[s][j].response = ;
+			}*/	
+			sort(keypoints[s].begin(),keypoints[s].end(),compare_response);
+			if (upright)for (unsigned int j = 0;j<keypoints[s].size();j++) keypoints[s][j].angle = -1;
+			keypoints[s].resize(maxFeatures);
 			descriptor->compute(img[s],keypoints[s],descriptors[s]);
 			if (normalizeSift) rootSift(&descriptors[s]);	
+<<<<<<< HEAD
 			timeDescription += getElapsedTime();
 			totalExtracted += descriptors[s].rows;
 			numPictures++;
+=======
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 		}
 
-		for (int nFeatures=maxFeatures;nFeatures>=minFeatures;nFeatures-=100)
+		for (int nFeatures=maxFeatures;nFeatures>minFeatures;nFeatures-=100)
 		{
 			for (int a=0;a<seasons;a++){
 				for (int b=a+1;b<seasons;b++){
@@ -364,30 +375,22 @@ int main(int argc, char ** argv)
 					keypoints1 = keypoints[a];	
 					keypoints2 = keypoints[b];	
 					numFeatures = nFeatures;
-
-					//use all features when numFeatures is 0 
-					if (numFeatures > 0){
-						int numRemove = max(0,descriptors1.rows-numFeatures); 
-						descriptors1.pop_back(numRemove);
-						numRemove = max(0,descriptors2.rows-numFeatures); 
-						descriptors2.pop_back(numRemove);
-					}
+					int numRemove = max(0,descriptors1.rows-numFeatures); 
+					descriptors1.pop_back(numRemove);
+					numRemove = max(0,descriptors2.rows-numFeatures); 
+					descriptors2.pop_back(numRemove);
+					time2 = time1 = getTime();
 					vector<DMatch> matches, inliers_matches;
 					int sumDev,auxMax,histMax;
 					sumDev = auxMax = histMax = 0;
 					numFeats[numFeatures/100]+=(descriptors1.rows+descriptors2.rows)/2;
 
 					// matching descriptors
-					getElapsedTime();
+					time3 = getTime();
 					matches.clear();
 					inliers_matches.clear();
 					if (descriptors1.rows*descriptors2.rows > 0) distinctiveMatch(descriptors1, descriptors2, matches, norm2, CROSSCHECK);
-
-					//benchmark unrestricted detector sets only 
-					if (numFeatures == 0){
-					       	timeMatching += getElapsedTime();
-						totalMatched += descriptors1.rows + descriptors2.rows;
-					}
+					time4 = getTime();
 
 					if (matches.size() > 0){
 
@@ -419,7 +422,6 @@ int main(int argc, char ** argv)
 							}
 
 							//find histogram maximum
-							int index = 0;
 							histMax = 0;
 							for (int i = 0;i<width*2;i++){
 								for (int j = 0;j<height*2;j++){
@@ -441,6 +443,7 @@ int main(int argc, char ** argv)
 							memset(bestHistogram,0,sizeof(int)*numBins);
 							histMax = 0;
 							int maxS,domDir;
+							maxS=domDir=0;
 							for (int s = 0;s<granularity;s++){
 								memset(histogram,0,sizeof(int)*numBins);
 								for( size_t i = 0; i < matches.size(); i++ )
@@ -495,22 +498,34 @@ int main(int argc, char ** argv)
 						printf("%05i %05i 1000 1000 %i 0 0\n",ims,ims,offsetX[ims]);
 						draw = update;
 					}
+<<<<<<< HEAD
 					if (fabs(difference) > 35) numFails[numFeatures/100]++;
 					if (draw&&(fabs(difference) > 35))
 					{
 						printf("DIFF: %i %i\n",(sumDev/histMax),-(offsetX[ims+numLocations*a]-offsetX[ims+numLocations*b]));
+=======
+					if (fabs(difference) > 35){
+						 numFails[numFeatures/100]++;
+						//draw = true;
+					}else{
+						draw = false;
+					}
+					if (draw)
+					{
+						printf("DIFF: %i %i %i\n",ims,(sumDev/histMax),-(offsetX[ims+numTests*a]-offsetX[ims+numTests*b]));
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 						Mat imA,imB,img_matches,img_matches_transposed;
 						vector<KeyPoint> kpA,kpB;
 						KeyPoint kp;
 						kpA.clear();
 						kpB.clear();
-						for (int s=0;s<keypoints1.size();s++){
+						for (unsigned int s=0;s<keypoints1.size();s++){
 							kp = keypoints1[s];
 							kp.pt.x = keypoints1[s].pt.y;
 							kp.pt.y = keypoints1[s].pt.x;
 							kpA.push_back(kp);
 						}
-						for (int s=0;s<keypoints2.size();s++){
+						for (unsigned int s=0;s<keypoints2.size();s++){
 							kp = keypoints2[s];
 							kp.pt.x = keypoints2[s].pt.y;
 							kp.pt.y = keypoints2[s].pt.x;
@@ -537,11 +552,21 @@ int main(int argc, char ** argv)
 		}
 	}
 	if (update) fclose(output);
+<<<<<<< HEAD
 	printf("%i %i\n",totalTests,numLocations*seasons*(seasons-1)/2);
 	char report[100];
 	sprintf(report,"%s/results/%s_%s.histogram",dataset,detectorName,descriptorName);
 	FILE* summary = fopen(report,"w+");
 	for (int n=0;n<=maxFeatures/100;n++) fprintf(summary,"%02i %.4f Detections: %i Times: %i %i %i Extracted: %i %i \n",n,100.0*numFails[n]/totalTests,numFeats[n]/totalTests,timeDetection/numPictures,timeDescription/numPictures,timeMatching/totalTests,totalExtracted/numPictures,totalMatched/totalTests);
+=======
+
+	numFails[0] = numTests*seasons*(seasons-1)/2;
+	numFeats[0] = numTests*seasons*(seasons-1)/2;
+	char report[100];
+	sprintf(report,"%s/results/%s_%s.histogram",dataset,detectorName,descriptorName);
+	FILE* summary = fopen(report,"w+");
+	for (int n=0;n<=maxFeatures/100;n++) fprintf(summary,"%02i %.4f %04i\n",n,100.0*numFails[n]/numFails[0],numFeats[n]/numFeats[0]);
+>>>>>>> e523af4a3087c7ffb6fa7bade09b70fa5af8ead5
 	fclose(summary);
 	delete seq1;
 	delete seq2;

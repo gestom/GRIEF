@@ -283,16 +283,16 @@ int main(int argc, char ** argv)
 				}
 				cv::transpose(img_matches,img_matches_transposed);
 				imshow("matches", img_matches_transposed);
-				key = waitKey(0);
-				if (key == 1113937) offsetX++;
-				if (key == 1113939) offsetX--;
-				//if (key == 1113938) locations[1]++;
-				//if (key == 1113940) locations[1]--;
-				if (key == 1048608) displayStyle=(displayStyle+1)%3;
+				key = waitKey(0)%256;
+				if (key == 83) offsetX++;
+				if (key == 81) offsetX--;
+				//if (key == 82) locations[1]++;
+				//if (key == 84) locations[1]--;
+				if (key == 32) displayStyle=(displayStyle+1)%3;
 				printf("Location %03i vs location %03i. Proposed offset: %i Manual offset: %i. Ignore this: %i \n",locations[0],locations[1],offsetX,offsetX-estimated,key);
-			}while (key !=1048586 && key != 1048603 && key != 1048603); //key != 1113940  && key != 1113938 && 
+			}while (key !=27 && key != 10);// && key != 82  && key != 84
 			totalTests++;
-			if (key == 1048586)
+			if (key == 10)
 			{
 				printf("Saved %03i vs %03i -  %i %i \n",locations[0],locations[1],offsetX,offsetY);
 				char retez[1000];
@@ -304,6 +304,6 @@ int main(int argc, char ** argv)
 				locations[1]++;
 			}
 		}
-	}while (key != 1048603);
+	}while (key != 27);
 	return 0;
 }

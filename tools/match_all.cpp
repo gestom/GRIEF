@@ -346,6 +346,14 @@ int main(int argc, char ** argv)
 			/*extraction*/
 			getElapsedTime();
 			if (upright) for (unsigned int j = 0;j<keypoints[s].size();j++) keypoints[s][j].angle = -1;
+
+			/*exceptional case: SIFT/ORB does not work well because the sift does not provide an octave with a feature*/
+			if (strstr(detectorName,"sift")!=NULL && strcmp(descriptorName,"orb")==0)
+			{
+				/*providing a fake octave*/
+				for (unsigned int j = 0;j<keypoints[s].size();j++) keypoints[s][j].octave = 1;
+			}
+
 			descriptor->compute(img[s],keypoints[s],descriptors[s]);
 			if (normalizeSift) rootSift(&descriptors[s]);	
 			timeDescription += getElapsedTime();
@@ -540,6 +548,7 @@ int main(int argc, char ** argv)
 	if (update) fclose(output);
 	int numPairs = numLocations*seasons*(seasons-1)/2;
 	printf("%i %i\n",totalTests,numLocations*seasons*(seasons-1)/2);
+	numFails[0] = numPairs;
 	char report[100];
 	sprintf(report,"%s/results/%s_%s.histogram",dataset,detectorName,descriptorName);
 	FILE* summary = fopen(report,"w+");

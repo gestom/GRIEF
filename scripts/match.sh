@@ -7,7 +7,7 @@ for m in $(seq 1 $n);
 do
 	a=$(echo $detectors|cut -f $m -d ' ')
 	b=$(echo $descriptors|cut -f $m -d ' ')
-	./tools/test_all $a $b $1 
+	./tools/match_all $a $b $1 
 done;
 echo Tests completed
 date 

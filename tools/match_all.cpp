@@ -48,9 +48,9 @@ FeatureDetector     *detector = NULL;
 DescriptorExtractor *descriptor = NULL;
 
 /*benchmarking time*/
-int timeDetection = 0;
-int timeDescription = 0;
-int timeMatching = 0;
+float timeDetection = 0;
+float timeDescription = 0;
+float timeMatching = 0;
 int totalExtracted = 0;
 int totalMatched = 0;
 
@@ -387,16 +387,14 @@ int main(int argc, char ** argv)
 					numFeats[numFeatures/100]+=(descriptors1.rows+descriptors2.rows)/2;
 
 					// matching descriptors
-					getElapsedTime();
 					matches.clear();
 					inliers_matches.clear();
+					getElapsedTime();
 					if (descriptors1.rows*descriptors2.rows > 0) distinctiveMatch(descriptors1, descriptors2, matches, norm2, CROSSCHECK);
 
 					//benchmark unrestricted detector sets only 
-					if (numFeatures == 0){
-					       	timeMatching += getElapsedTime();
-						totalMatched += descriptors1.rows + descriptors2.rows;
-					}
+					timeMatching += getElapsedTime();
+					totalMatched += descriptors1.rows*descriptors2.rows;
 
 					if (matches.size() > 0){
 
@@ -552,7 +550,7 @@ int main(int argc, char ** argv)
 	char report[100];
 	sprintf(report,"%s/results/%s_%s.histogram",dataset,detectorName,descriptorName);
 	FILE* summary = fopen(report,"w+");
-	for (int n=0;n<=maxFeatures/100;n++) fprintf(summary,"%02i %.4f Detections: %i Times: %i %i %i Extracted: %i %i \n",n,100.0*numFails[n]/numPairs,numFeats[n]/numPairs,timeDetection/numPictures,timeDescription/numPictures,timeMatching/totalTests,totalExtracted/numPictures,totalMatched/totalTests);
+	for (int n=0;n<=maxFeatures/100;n++) fprintf(summary,"%02i %.4f Detections: %i Times: %.3f %.3f %.3f Extracted: %i %i \n",n,100.0*numFails[n]/numPairs,numFeats[n]/numPairs,timeDetection/numPictures,timeDescription/totalExtracted*1000,timeMatching/totalMatched*1000000,totalExtracted/numPictures,totalMatched/totalTests);
 	fclose(summary);
 	delete seq1;
 	delete seq2;

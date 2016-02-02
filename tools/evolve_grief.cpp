@@ -14,6 +14,7 @@
 #define MAX_LOCATIONS 1000
 #define WINDOW_SIZE 48 
 
+int numExchange = 10;
 int runs = 0;
 bool save=false;
 bool draw=false; 
@@ -73,7 +74,7 @@ int generateNew()
 	sum=sum/griefDescriptorLength;
 
 	//exchange 10 comparisons by 10 random ones
-	for (int i = griefDescriptorLength-10;i<griefDescriptorLength;i++){
+	for (int i = griefDescriptorLength-numExchange;i<griefDescriptorLength;i++){
 		int id = griefRating[i].id;
 		x1[id] = rand()%xWindow-xWindow/2;
 		y1[id] = rand()%yWindow-yWindow/2;
@@ -295,6 +296,7 @@ int main(int argc, char ** argv)
 
 		cout << "Detecting STAR features and extracting genetically modified BRIEF descriptors"  << endl;
 		StarFeatureDetector detector(45,detectorThreshold,10,8,5);		//TODO make this selectable
+		//BRISK detector(0,4);
 		GriefDescriptorExtractor extractor(griefDescriptorLength/8);
 
 		time0 = getTime();

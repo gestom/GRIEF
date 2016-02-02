@@ -286,11 +286,11 @@ void initializeDescriptor(char *nameI)
 	/*descriptors*/
 	if (strcmp("sift",  name)==0)  	{norm2=true;descriptor = new SIFT(0,3,0.0,10,1.6);}
 	if (strcmp("surf",  name)==0)   {norm2=true;descriptor = new SURF(0);}
-	if (strcmp("brisk", name)==0)   {norm2=true;descriptor = new BRISK(0,4);}
+	if (strcmp("brisk", name)==0)   {norm2=false;descriptor = new BRISK(0,4);}
 	if (strcmp("brief", name)==0)   {norm2=false;descriptor = new BriefDescriptorExtractor(32);}
 	if (strcmp("grief", name)==0)   {norm2=false;descriptor = new GriefDescriptorExtractor(32);}
 	if (strcmp("orb",   name)==0)   {norm2=false;descriptor = new OrbFeatureDetector(maxFeatures,1.2f,8,31,0,2,0,31);} 
-	if (strcmp("freak",  name)==0)	descriptor = new FREAK();
+	if (strcmp("freak",  name)==0)	{norm2=false;descriptor = new FREAK();}
 }
 
 int main(int argc, char ** argv) 

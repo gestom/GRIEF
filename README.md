@@ -6,7 +6,8 @@ In particular, we adress the robustness of image features to seasonal changes in
 We provide an evolutionary algorithm that allows to train the BRIEF features to be robust to environmental changee.
 We call this feature GRIEF (Generated BRIEF).
 Moreover, we provide a simple framework that allows to benchmark the feature extractors.
-The feature and its evaluation is described in detail at European Conference on Mobile robotics [[1](#references)]. 
+The feature and its evaluation was first presented at European Conference on Mobile robotics [[1](#references)].
+A new, improved version that also allows to combine different detectors and descriptors, is described in a paper that is currently reviewed in <i>Journal of Robotics and Autonomous Systems</i>. 
 
 ##Dependencies
 
@@ -23,49 +24,41 @@ You can install those by:
 
 - sudo apt-get install gnuplot xfig transfig 
 
+##Datasets
+
+The datasets we used for evaluation are available for download at my [google drive](https://drive.google.com/open?id=0B7TY_9FitfdlNkV6eW94NU5GVU0) and at [L-CAS owncloud](https://lcas.lincoln.ac.uk/owncloud/shared/datasets/).
+
 ##GRIEF training
 
-1. running <b>./scripts/evolveGrief.sh NUMBER</b> will evolve a NUMBER generations of GRIEF 
-2. you can create your own training dataset with 12 images to train the GRIEF - see <i>training_data</i> for a reference,
-3. to reset the GRIEF to be the same as BRIEF <b>./scripts/resetGrief.sh</b>
-4. to switch to the GRIEF that was used in [[1](#references)], run <b>./scripts/restoreGrief.sh</b>
-
-Note, that the <i>grief_history</i> directory contains comparisons for the individual GRIEF generations and their fitness.
+1. running <b>./scripts/evolveGrief.sh DATASET NUMBER</b> will evolve a NUMBER generations of GRIEF using a provided dataset,
+1. training will be speeded-up if you restrict the number of images by creating a smaller dataset just for training,
+1. to reset the GRIEF to be the same as BRIEF <b>./scripts/resetGrief.sh</b>
+1. to switch to the GRIEF that was used in [[1](#references)], run <b>./scripts/restoreGrief.sh</b>
+1. to switch to an arbitrary GRIEF that was generated during the training, run <b>./scripts/restoreGrief.sh [grief_file]</b>. The <i>grief_files</i>  are in <i>grief_history</i> directory, which contains comparisons for the individual GRIEF generations and their fitness.
 
 ##Feature evaluation
 
-###A quick test
-1. Go to <i>tools</i> and compile the <i>test_all</i> util: <b>cd tools/test;make test_all;cd ../..</b>,
-2. run the benchmark on the provided dataset: <b>./scripts/match.sh testing_data</b>.
-3. Show the results: <b>./scripts/draw.sh; evince rates.pdf</b>
+###Testing the main program 
 
-###To use on own data
+1. Go to <i>tools</i> and compile the <i>match_all</i> utilily: <b>cd tools;make;cd ..</b>,
+1. Run <b>./tools/match_all DETECTOR DESCRIPTOR DATASET</b> to perform the evaluation of a single detector/descriptor combination (e.g. <b>./tools/match_all star brief GRIEF_dataset/michigan</b>)
+1. After the tests finishes, have a look in the <i>dataset/results/</i> directory for a <i>detector_descriptor.histogram</i> file.
+1. Run the benchmark on the provided dataset: <b>./scripts/match_all.sh DATASET</b>.
 
-1. prepare a dataset directory, see the <i>testing_data</i> folder for reference,
-2. select detectors and descriptors to use by editing the <i>detectors</i> and <i>descriptors</i> files in the settings directory,
-3. run <i>./scripts/match.sh NAME</i> - this performs the benchmark and populates the <i>NAME/results</i> directory
-4. run <i>./scripts/draw.sh</i>  - creates a graph with the results
+###Running benchmarks 
 
-##Directory structure of our project
+1. The first lines of the <i>detectors</i> and <i>descriptors</i> files in the <i>settings</i> folder contain the detectors and descriptors that will be used for the benchmark. You can select the detectors and descriptors for the benchmark by editing these files. 
+1. run a benchmark of all detector/descriptor combinations  : <b>./scripts/match_all.sh dataset</b>.
+1. run a benchmark that will test the detector/descriptor pairs in a successive way: <b>./scripts/match.sh dataset</b> (see the script for reference).
 
-###settings:
-- the first lines of the <i>detectors</i> and <i>descriptors</i> contain the detectors and descriptors that will be used for the benchmark
-
-###testing_data
-- the first 100 pictures of the stromovka-path long-term dataset including manual, hand-made ground-truth in the <i>displacements.txt</i> files
-	- <i>results</i> subfolder contains benchmarking results
-
-###tools:
-- binaries for testing and GRIEF evolution
-
-###scripts:
-- match.sh DATASET 		- performs the benchmark and fills the DATASET/results 
-- evolveGrief.sh NUMBER		- evolves GRIEF for NUMBER generations on the 12 images provided in the <i>training_data</i> 
-- match-all.sh DATASET 		- performs the benchmark, fills the DATASET/results, combines every detector with every descriptor from the first lines of the setting/detector and setting/descriptors files
-- draw.sh 			- generates a graph <i>rates.pdf</i> from the <i>DATASET/results</i> directory
+###Evaluation of results
+1. The scripts, which evaluate the results obtained by runnong the benchmarks, evaluate the detectors and descriptors from the first lines of the files in the <i>settings</i> folder. 
+1. Running <i>./scripts/benchmark_evolution.sh DATASET</i> evaluates every interation of the GRIEF algorithm stored in the <i>grief_history</i> on a given DATASET. 
+1. Running <i>./scripts/benchmark_speeds.sh</i>  creates a latex-formatted table that summarizes the time needed for detection, description and matching.
+1. Running <i>./scripts/precision.sh</i>  creates a latex-formatted table that contains the error rates of the detector/descriptor combinations. 
+1. Running <i>./scripts/draw.sh</i> draws (in xfig and pdf format) the dependence of the heading estimation error on the number of features extracted. 
 
 
 ##References
 ======
 1. T.Krajnik, P.Cristoforis, M.Nitsche, K. Kusumam, T.Duckett: <b>[Image features and seasons revisited.](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_ECMR_2015.pdf)</b> ECMR 2015. <i>[bibtex](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_ECMR_2015.bib)</i>.
-

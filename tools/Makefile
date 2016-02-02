@@ -6,21 +6,23 @@ OBJECTS=$(SOURCES:.cpp=.o)
 
 EXECUTABLE=$(TARGET)
 
-CFLAGS := -Wall -g -O3 -Wfatal-errors -mssse3 -msse2 -march=native
-#CFLAGS := -g -O3 -mssse3 -msse2 -march=native
+#CFLAGS := -Wall -g -O3 -Wfatal-errors -mssse3 -msse2 -march=native
+CFLAGS := -ggdb 
 LDFLAGS :=  grief/grief.cpp -Llib -Wl,-rpath='$$ORIGIN/lib' -g `pkg-config opencv --libs` 
 
 # OpenCV
 #CFLAGS += `pkg-config opencv --cflags`
 
-match_all: match_all.cpp
+all: match_all evolve_grief annotate
+
+match_all: match_all.cpp grief/grief.cpp 
 	$(CC) match_all.cpp $(CFLAGS) $(LDFLAGS) -o $@ 
 
-evolve_grief: evolve_grief.cpp
-	$(CC) evolve_grief.cpp $(FLAGS) $(LDFLAGS) -o $@
+evolve_grief: evolve_grief.cpp grief/grief.cpp 
+	$(CC) evolve_grief.cpp $(CFLAGS) $(LDFLAGS) -o $@
  
-annotate: match_all.cpp
-	$(CC) annotate.cpp $(FLAGS) $(LDFLAGS) -o $@ 
+annotate: annotate.cpp grief/grief.cpp 
+	$(CC) annotate.cpp $(CFLAGS) $(LDFLAGS) -o $@ 
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE) 

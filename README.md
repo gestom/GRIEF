@@ -48,8 +48,8 @@ The datasets we used for evaluation are available for download at my [google dri
 ###Running benchmarks 
 
 1. The first lines of the <i>detectors</i> and <i>descriptors</i> files in the <i>settings</i> folder contain the detectors and descriptors that will be used for the benchmark. You can select the detectors and descriptors for the benchmark by editing these files. 
-1. run a benchmark of all detector/descriptor combinations  : <b>./scripts/match_all.sh dataset</b>.
-1. run a benchmark that will test the detector/descriptor pairs in a successive way: <b>./scripts/match.sh dataset</b> (see the script for reference).
+1. To run a benchmark of all detector/descriptor combinations  : <b>./scripts/match_all.sh dataset</b>.
+1. To run a benchmark that will test the detector/descriptor pairs in a successive way: <b>./scripts/match.sh dataset</b> (see the script for reference).
 
 ###Evaluation of results
 1. The scripts, which evaluate the results obtained by runnong the benchmarks, evaluate the detectors and descriptors from the first lines of the files in the <i>settings</i> folder. 

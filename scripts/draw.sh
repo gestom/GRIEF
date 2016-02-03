@@ -40,4 +40,5 @@ fi
 
 #call gnuplot to draw the results
 gnuplot rates.tmp >rates.fig;fig2dev -Lpdf rates.fig >rates.pdf
+rm rates.tmp
 echo "Generated rates.fig and rates.pdf files, check them out"

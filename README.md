@@ -17,7 +17,7 @@ To install the openCV-nonfree, type this in terminal:
 - sudo add-apt-repository --yes ppa:xqms/opencv-nonfree
 - sudo apt-get update 
 - sudo apt-get install libopencv-nonfree-dev
-- sudo install libopencv-dev package
+- sudo install libopencv-dev
 
 Moreover, it uses the <i>gnuplot</i> and <i>transfig</i> packages to draw the results.
 You can install those by:
@@ -30,7 +30,7 @@ The datasets we used for evaluation are available for download at my [google dri
 
 ##GRIEF training
 
-1. running <b>./scripts/evolveGrief.sh DATASET NUMBER</b> will evolve a NUMBER generations of GRIEF using a provided dataset,
+1. running <b>./scripts/evolveGrief.sh DATASET NUMBER</b> will evolve a NUMBER of GRIEF generations on DATATASET,
 1. training will be speeded-up if you restrict the number of images by creating a smaller dataset just for training,
 1. to reset the GRIEF to be the same as BRIEF <b>./scripts/resetGrief.sh</b>
 1. to switch to the GRIEF that was used in [[1](#references)], run <b>./scripts/restoreGrief.sh</b>
@@ -41,8 +41,8 @@ The datasets we used for evaluation are available for download at my [google dri
 ###Testing the main program 
 
 1. Go to <i>tools</i> and compile the <i>match_all</i> utilily: <b>cd tools;make;cd ..</b>,
-1. Run <b>./tools/match_all DETECTOR DESCRIPTOR DATASET</b> to perform the evaluation of a single detector/descriptor combination (e.g. <b>./tools/match_all star brief GRIEF_dataset/michigan</b>)
-1. After the tests finishes, have a look in the <i>dataset/results/</i> directory for a <i>detector_descriptor.histogram</i> file.
+1. Run <b>./tools/match_all DETECTOR DESCRIPTOR DATASET</b> to perform the evaluation of a single detector/descriptor combination (e.g. <b>./tools/match_all star brief GRIEF-dataset/michigan</b>),
+1. After the tests finishes, have a look in the <i>dataset/results/</i> directory for a <i>detector_descriptor.histogram</i> file (e.g. <i>GRIEF-datasets/michigan/results/up-surf_brief.histogram</i>),
 1. Run the benchmark on the provided dataset: <b>./scripts/match_all.sh DATASET</b>.
 
 ###Running benchmarks 

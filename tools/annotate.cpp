@@ -1,3 +1,8 @@
+//this tool can be used for automatic annotation of the datasets - it's undocumented
+//however, use only as a reference (!), otherwise it might create a strong bias towards the method which is used to register the images in this annotation tool
+//always make sure that you do the annotation manually (!)
+//the current code was tailored to annotate sequences of the Nordland dataset 
+
 #include <sys/time.h>
 #include <stdlib.h>
 #include <opencv2/opencv.hpp>
@@ -29,7 +34,9 @@ FILE *output = NULL;
 int seasons = 0;
 char season[1000][1000]; 
 char dataset[1000];
-int numLocations;
+int numLocations= 0;
+int autoBestMatch= 0;
+int autoLocation = 0;
 
 FeatureDetector     *detector = NULL;
 DescriptorExtractor *descriptor = NULL;
@@ -132,8 +139,9 @@ int main(int argc, char ** argv)
 	int numPictures = 0;
 	int locations[seasons];
 	int key = 0;
-	locations[0] = 0;  
-	locations[1] = 0;
+	locations[0] = 18737;  
+	locations[1] = 18590;
+	int locationScan = 0;
 	do{
 		delete detector;
 		delete descriptor;
@@ -144,7 +152,8 @@ int main(int argc, char ** argv)
 		vector<KeyPoint> keypoints[seasons];
 		for (int s = 0;s<seasons;s++)
 		{
-			sprintf(filename,"%s/%s/%09i.bmp",dataset,season[s],locations[s]);
+			sprintf(filename,"%s/%s/%08i.bmp",dataset,season[s],locations[s]);
+			printf("%s/%s/%08i.bmp",dataset,season[s],locations[s]);
 			im[s] =  imread(filename, CV_LOAD_IMAGE_COLOR);
 			img[s] = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
 			if (img[s].empty())
@@ -153,6 +162,7 @@ int main(int argc, char ** argv)
 				return -1;
 			}
 		}
+		printf("\n");
 
 		detector = new StarFeatureDetector(45,0,10,8,5);
 		descriptor = new GriefDescriptorExtractor(32);
@@ -283,16 +293,52 @@ int main(int argc, char ** argv)
 				}
 				cv::transpose(img_matches,img_matches_transposed);
 				imshow("matches", img_matches_transposed);
-				key = waitKey(0)%256;
+				printf("Location %03i vs location %03i. Proposed offset: %i Manual offset: %i. Scan: %i Features: %i Pressed key: %i \n",locations[0],locations[1],offsetX,offsetX-estimated,locationScan,histMax,key);
+				if (locationScan <= 0){
+				       	key = waitKey(1)%256;
+				        //key = 'a';	
+				}else {
+					key = waitKey(1);
+					key = 0;
+					if (histMax > autoBestMatch){
+						autoBestMatch = histMax;
+						autoLocation = locations[1];
+					}
+					locationScan--;
+					if (locationScan < 2)
+					{
+						locations[1] = autoLocation;	
+					}else{
+						locations[1]++;
+					}
+				}
 				if (key == 83) offsetX++;
 				if (key == 81) offsetX--;
-				//if (key == 82) locations[1]++;
-				//if (key == 84) locations[1]--;
+				if (key == 82) locations[1]++;
+				if (key == 84) locations[1]--;
+				if (key == '1')
+				{
+					locations[0]++;
+					locations[1]++;
+				}
+				if (key == '2')
+				{
+					locations[0]+=10;
+					locations[1]+=10;
+				}
+				if (key == '3')
+				{
+					locations[0]+=50;
+					locations[1]+=50;
+				}
+				if (key == 'a'){
+					locationScan = 50;
+					autoBestMatch = 0;
+				}
 				if (key == 32) displayStyle=(displayStyle+1)%3;
-				printf("Location %03i vs location %03i. Proposed offset: %i Manual offset: %i. Ignore this: %i \n",locations[0],locations[1],offsetX,offsetX-estimated,key);
-			}while (key !=27 && key != 10);// && key != 82  && key != 84
+			}while (key !=27 && key != 10 && key != 82  && key != 84 && key != '1' && key != '2' && key != '3' && locationScan == 0);
 			totalTests++;
-			if (key == 10)
+			if (key == 10 || key == 'a')
 			{
 				printf("Saved %03i vs %03i -  %i %i \n",locations[0],locations[1],offsetX,offsetY);
 				char retez[1000];
@@ -300,8 +346,10 @@ int main(int argc, char ** argv)
 				output = fopen(retez,"a");	
 				fprintf(output,"%03i %03i %i %i \n",locations[0],locations[1],offsetX,offsetY);
 				fclose(output);
-				locations[0]++;
-				locations[1]++;
+				locations[0]+=50;
+				locations[1]+= 25;
+				//locations[0]++;
+				//locations[1]++;
 			}
 		}
 	}while (key != 27);

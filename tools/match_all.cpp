@@ -33,7 +33,7 @@ bool hist2D = false;
 int difference = 0;
 FILE *output = NULL;
 int maxFeatures=1600;
-int minFeatures=1599;
+int minFeatures=99;
 int numFeatures=maxFeatures;
 
 int numFails[1600/100+1];
@@ -342,7 +342,6 @@ int main(int argc, char ** argv)
 			timeDetection += getElapsedTime();
 
 			sort(keypoints[s].begin(),keypoints[s].end(),compare_response);
-
 			/*extraction*/
 			getElapsedTime();
 			if (upright) for (unsigned int j = 0;j<keypoints[s].size();j++) keypoints[s][j].angle = -1;
@@ -503,9 +502,10 @@ int main(int argc, char ** argv)
 						draw = update;
 					}
 					if (fabs(difference) > 35) numFails[numFeatures/100]++;
-					if (draw&&(fabs(difference) > 35))
+					printf("Report: %s %s %09i : %i : %i : %.f\n",season[a],season[b],totalTests,numFails[numFeatures/100],fabs(difference) > 35,fabs(difference));
+					if (drawAll || save || (draw&&(fabs(difference) > 35)))
 					{
-						printf("DIFF: %i %i\n",(sumDev/histMax),-(offsetX[ims+numLocations*a]-offsetX[ims+numLocations*b]));
+						if (fabs(difference) > 35) printf("DIFF: %i %i\n",(sumDev/histMax),-(offsetX[ims+numLocations*a]-offsetX[ims+numLocations*b]));
 						Mat imA,imB,img_matches,img_matches_transposed;
 						vector<KeyPoint> kpA,kpB;
 						KeyPoint kp;
@@ -526,16 +526,36 @@ int main(int argc, char ** argv)
 						cv::transpose(im[a], imA);
 						cv::transpose(im[b], imB);
 						namedWindow("matches", 1);
-						if (kpA.size() >0 && kpB.size()>0 && inliers_matches.size() >0){
-							drawMatches(imA, kpA, imB, kpB, inliers_matches, img_matches, Scalar(0, 0, 255), Scalar(0, 0, 255), vector<char>(), 0);
+						Scalar color(0,0,255);
+						if (kpA.size() >0 && kpB.size()>0 && inliers_matches.size() >0)
+						{
+							if (fabs(difference) <= 35) color = Scalar(0,255,0);
 						}else{
 							kpA.push_back(kp);
 							kpB.push_back(kp);
-							drawMatches(imA, kpA, imB, kpB, matches, img_matches, Scalar(0, 0, 255), Scalar(0, 0, 255), vector<char>(), 0);
 						}
+						drawMatches(imA, kpA, imB, kpB, inliers_matches, img_matches, color, color, vector<char>(), 2);
 						cv::transpose(img_matches,img_matches_transposed);
-						imshow("matches", img_matches_transposed);
-						waitKey(0);
+						if (save){
+							sprintf(filename,"%s/%09i-%02i-%02i-A.bmp",dataset,totalTests,a,b);
+							char description[1000];
+							sprintf(description,"Successes: %03i Failures: %03i",totalTests+1-numFails[numFeatures/100],numFails[numFeatures/100]);
+							line(img_matches_transposed,cvPoint(15,20),cvPoint(358,20),Scalar(0,0,0),32,0);
+							putText(img_matches_transposed,description,cvPoint(10,28), FONT_HERSHEY_SIMPLEX, 0.75,color,2.5);
+
+							imwrite(filename,img_matches_transposed);
+							imA = 0*imA;
+							imB = 0*imB; 
+							drawMatches(imA, kpA, imB, kpB, inliers_matches, img_matches, color, color, vector<char>(), 2);
+							cv::transpose(img_matches,img_matches_transposed);
+							sprintf(filename,"%s/%09i-%02i-%02i-B.bmp",dataset,totalTests,a,b);
+							imwrite(filename,img_matches_transposed);
+							//imshow("matches", img_matches_transposed);
+							//waitKey(0);
+						}else{
+							imshow("matches", img_matches_transposed);
+							waitKey(0);
+						}
 					}
 					printf("Season %02i vs %02i, features %04i of %04i, location %03i of %03i \n",a,b,nFeatures,maxFeatures,ims+1,numLocations);
 					totalTests++;
@@ -550,7 +570,10 @@ int main(int argc, char ** argv)
 	char report[100];
 	sprintf(report,"%s/results/%s_%s.histogram",dataset,detectorName,descriptorName);
 	FILE* summary = fopen(report,"w+");
-	for (int n=0;n<=maxFeatures/100;n++) fprintf(summary,"%02i %.4f Detections: %i Times: %.3f %.3f %.3f Extracted: %i %i \n",n,100.0*numFails[n]/numPairs,numFeats[n]/numPairs,timeDetection/numPictures,timeDescription/totalExtracted*1000,timeMatching/totalMatched*1000000,totalExtracted/numPictures,totalMatched/totalTests);
+	for (int n=0;n<=maxFeatures/100;n++){
+	       	fprintf(summary,"%02i %.4f Detections: %i Times: %.3f %.3f %.3f Extracted: %i %i \n",n,100.0*numFails[n]/numPairs,numFeats[n]/numPairs,timeDetection/numPictures,timeDescription/totalExtracted*1000,timeMatching/totalMatched*1000000,totalExtracted/numPictures,totalMatched/totalTests);
+	       	printf("%02i %.4f Detections: %i Times: %.3f %.3f %.3f Extracted: %i %i \n",n,100.0*numFails[n]/numPairs,numFeats[n]/numPairs,timeDetection/numPictures,timeDescription/totalExtracted*1000,timeMatching/totalMatched*1000000,totalExtracted/numPictures,totalMatched/totalTests);
+	}
 	fclose(summary);
 	delete seq1;
 	delete seq2;

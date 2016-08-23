@@ -26,6 +26,7 @@ annotate: annotate.cpp grief/grief.cpp
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE) 
+	rm -f match_all evolve_grief annotate 
 
 cleanall:
 	rm -f *.o 

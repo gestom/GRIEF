@@ -14,6 +14,7 @@
 #define MAX_LOCATIONS 1000
 #define WINDOW_SIZE 48 
 
+char fileInfo[1000];
 int numExchange = 10;
 int runs = 0;
 bool save=false;
@@ -23,7 +24,7 @@ using namespace std;
 using namespace cv;
 unsigned int n;
 float distance_factor = 1.0;
-int griefDescriptorLength= 256;
+int griefDescriptorLength= 512;
 char dataset[1000];
 char season[1000][1000]; 
 int matchingTests = 0;
@@ -96,6 +97,45 @@ int getTime()
   struct  timeval currentTime;
   gettimeofday(&currentTime, NULL);
   return currentTime.tv_sec*1000 + currentTime.tv_usec/1000;
+}
+
+namespace cv{
+
+	class CV_EXPORTS FakeFeatureDetector : public FeatureDetector
+	{
+		public:
+			// bytes is a length of descriptor in bytes. It can be equal 16, 32 or 64 bytes.
+			FakeFeatureDetector(){}
+
+
+		protected:
+			virtual void detectImpl( const Mat& image, vector<KeyPoint>& keypoints, const Mat& mask=Mat() ) const;
+			//virtual void detectImpl(const Mat& image, vector<KeyPoint>& keypoints, Mat& descriptors) const;
+			//typedef void(*PixelTestFn)(const Mat&, const vector<KeyPoint>&, Mat&);
+	};
+}
+
+void FakeFeatureDetector::detectImpl( const Mat& image, vector<KeyPoint>& keypoints, const Mat& mask ) const
+{
+	FILE *file = fopen(fileInfo,"r");
+	keypoints.clear();
+	float a,b,c,d,x,y;
+	KeyPoint kp;
+	while (feof(file) == 0)
+	{
+		fscanf(file,"%f,%f,%f,%f\n",&a,&b,&c,&d);
+		//kp.pt.x = (a+c)/2.0;
+		//kp.pt.y = (b+d)/2.0;
+		kp.pt.x = (a+c)/2.0;
+		kp.pt.y = (b+d)/2.0;
+		kp.angle = 0;
+		kp.octave = 1;
+		kp.response = 2;
+		kp.size = 1.0/fmin((c-a)/2,(d-b)/2);
+		keypoints.push_back(kp);
+	}
+	//fprintf(stdout,"MOTOFOKO %s %i\n",fileInfo,keypoints.size());
+	fclose(file);
 }
 
 //feature matching - this can combine 'ratio' and 'cross-check' 
@@ -187,7 +227,7 @@ int main(int argc, char ** argv)
 	int numSeasons = 0;
 	int numLocations = 0;
 	int numDisplacements = 0;
-	bool supervised = true;
+	bool supervised = false;
 	Mat tmpIm; 
 	int x,y; 
 	FILE *displacements;
@@ -296,11 +336,13 @@ int main(int argc, char ** argv)
 
 		cout << "Detecting STAR features and extracting genetically modified BRIEF descriptors"  << endl;
 		StarFeatureDetector detector(45,detectorThreshold,10,8,5);		//TODO make this selectable
+		//FakeFeatureDetector detector;		//TODO make this selectable
 		//BRISK detector(0,4);
 		GriefDescriptorExtractor extractor(griefDescriptorLength/8);
 
 		time0 = getTime();
 		for (int i = 0;i<numSeasons;i++){
+			sprintf(fileInfo,"%s/season_%02i/spgrid_regions_%09i.txt",argv[1],i,location);
 			detector.detect(img[i], keypoints[i]);
 			extractor.compute(img[i], keypoints[i], descriptors[i]);
 			printf("Location %i season %i, extracted %i\n",location,i,(int)keypoints[i].size());

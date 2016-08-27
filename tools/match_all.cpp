@@ -33,7 +33,7 @@ bool hist2D = false;
 int difference = 0;
 FILE *output = NULL;
 int maxFeatures=1600;
-int minFeatures=99;
+int minFeatures=1599;
 int numFeatures=maxFeatures;
 
 int numFails[1600/100+1];
@@ -43,6 +43,7 @@ int seasons = 0;
 char dataset[1000];
 char descriptorName[1000];
 char detectorName[1000];
+char fileInfo[1000];
 
 FeatureDetector     *detector = NULL;
 DescriptorExtractor *descriptor = NULL;
@@ -254,6 +255,43 @@ int initializeDateset()
 	return 0;
 }
 
+namespace cv{
+
+	class CV_EXPORTS FakeFeatureDetector : public FeatureDetector
+	{
+		public:
+			// bytes is a length of descriptor in bytes. It can be equal 16, 32 or 64 bytes.
+			FakeFeatureDetector(){}
+
+
+		protected:
+			virtual void detectImpl( const Mat& image, vector<KeyPoint>& keypoints, const Mat& mask=Mat() ) const;
+			//virtual void detectImpl(const Mat& image, vector<KeyPoint>& keypoints, Mat& descriptors) const;
+			//typedef void(*PixelTestFn)(const Mat&, const vector<KeyPoint>&, Mat&);
+	};
+}
+
+void FakeFeatureDetector::detectImpl( const Mat& image, vector<KeyPoint>& keypoints, const Mat& mask ) const
+{
+	FILE *file = fopen(fileInfo,"r");
+	keypoints.clear();
+	float a,b,c,d,x,y;
+	KeyPoint kp;
+	while (feof(file) == 0)
+	{
+		fscanf(file,"%f,%f,%f,%f\n",&a,&b,&c,&d);
+		kp.pt.x = (a+c)/2.0;
+		kp.pt.y = (b+d)/2.0;
+		kp.angle = -1;
+		kp.octave = (d-b);
+		kp.response = (c-a);
+		kp.size = sqrt((d-b)*(c-a));
+		keypoints.push_back(kp);
+	}
+	//fprintf(stdout,"MOTOFOKO %s %i\n",fileInfo,keypoints.size());
+	fclose(file);
+}
+
 /*initialize detector*/
 void initializeDetector(char *nameI)
 {
@@ -274,6 +312,7 @@ void initializeDetector(char *nameI)
 	/*new ones*/
 	if (strcmp("mser",  name)==0)	detector = new MSER(2);
 	if (strcmp("gftt",  name)==0)	detector = new GFTTDetector(1600,0.01,1,3,false,0.04);
+	if (strcmp("fake",  name)==0)	detector = new FakeFeatureDetector();
 }
 
 /*initialize detector*/
@@ -288,7 +327,7 @@ void initializeDescriptor(char *nameI)
 	if (strcmp("surf",  name)==0)   {norm2=true;descriptor = new SURF(0);}
 	if (strcmp("brisk", name)==0)   {norm2=false;descriptor = new BRISK(0,4);}
 	if (strcmp("brief", name)==0)   {norm2=false;descriptor = new BriefDescriptorExtractor(32);}
-	if (strcmp("grief", name)==0)   {norm2=false;descriptor = new GriefDescriptorExtractor(32);}
+	if (strcmp("grief", name)==0)   {norm2=false;descriptor = new GriefDescriptorExtractor(64);}
 	if (strcmp("orb",   name)==0)   {norm2=false;descriptor = new OrbFeatureDetector(maxFeatures,1.2f,8,31,0,2,0,31);} 
 	if (strcmp("freak",  name)==0)	{norm2=false;descriptor = new FREAK();}
 }
@@ -338,7 +377,10 @@ int main(int argc, char ** argv)
 		{
 			/*detection*/
 			getElapsedTime();
+			sprintf(fileInfo,"%s/%s/spgrid_regions_%09i.txt",dataset,season[s],ims);	//for the FAKE detector
 			detector->detect(img[s], keypoints[s]);
+			//for (int k = 0;k<keypoints[s].size();k++) std::cout << fileInfo << " " << keypoints[s][k].pt.x << " " << keypoints[s][k].pt.y << " " << keypoints[s][k].angle << " " << keypoints[s][k].octave << " " << keypoints[s][k].response << " " << keypoints[s][k].size << std::endl;
+			
 			timeDetection += getElapsedTime();
 
 			sort(keypoints[s].begin(),keypoints[s].end(),compare_response);
@@ -502,7 +544,7 @@ int main(int argc, char ** argv)
 						draw = update;
 					}
 					if (fabs(difference) > 35) numFails[numFeatures/100]++;
-					printf("Report: %s %s %09i : %i : %i : %.f\n",season[a],season[b],totalTests,numFails[numFeatures/100],fabs(difference) > 35,fabs(difference));
+					printf("Report: %s %s %09i : %i : %i : %.f - ",season[a],season[b],totalTests,numFails[numFeatures/100],fabs(difference) > 35,fabs(difference));
 					if (drawAll || save || (draw&&(fabs(difference) > 35)))
 					{
 						if (fabs(difference) > 35) printf("DIFF: %i %i\n",(sumDev/histMax),-(offsetX[ims+numLocations*a]-offsetX[ims+numLocations*b]));

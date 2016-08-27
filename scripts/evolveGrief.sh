@@ -13,8 +13,10 @@ do
 	./generate.sh >/dev/null;
 	cd ..;
 	f=$e;
-	e=$(./tools/evolve_grief $1 |grep fitness|cut -f 3 -d ' ');
-	echo Population $i Fitness $e;
+	./tools/evolve_grief $1 |grep fitness >store.tmp
+	e=$(cat store.tmp|cut -f 3 -d ' ');
+	r=$(cat store.tmp|cut -f 4 -d ' ');
+	echo Population $i Fitness $e Error $r;
 	j=$(printf %05i $i);
 	cp tools/grief/pair_stats.txt grief_history/$j\_$e.txt;
 done

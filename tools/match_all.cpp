@@ -283,8 +283,8 @@ void FakeFeatureDetector::detectImpl( const Mat& image, vector<KeyPoint>& keypoi
 		kp.pt.x = (a+c)/2.0;
 		kp.pt.y = (b+d)/2.0;
 		kp.angle = -1;
-		kp.octave = (d-b);
-		kp.response = (c-a);
+		kp.octave = 1;
+		kp.response = 1;
 		kp.size = sqrt((d-b)*(c-a));
 		keypoints.push_back(kp);
 	}
@@ -327,7 +327,7 @@ void initializeDescriptor(char *nameI)
 	if (strcmp("surf",  name)==0)   {norm2=true;descriptor = new SURF(0);}
 	if (strcmp("brisk", name)==0)   {norm2=false;descriptor = new BRISK(0,4);}
 	if (strcmp("brief", name)==0)   {norm2=false;descriptor = new BriefDescriptorExtractor(32);}
-	if (strcmp("grief", name)==0)   {norm2=false;descriptor = new GriefDescriptorExtractor(64);}
+	if (strcmp("grief", name)==0)   {norm2=false;descriptor = new GriefDescriptorExtractor(32);}
 	if (strcmp("orb",   name)==0)   {norm2=false;descriptor = new OrbFeatureDetector(maxFeatures,1.2f,8,31,0,2,0,31);} 
 	if (strcmp("freak",  name)==0)	{norm2=false;descriptor = new FREAK();}
 }
@@ -377,7 +377,7 @@ int main(int argc, char ** argv)
 		{
 			/*detection*/
 			getElapsedTime();
-			sprintf(fileInfo,"%s/%s/spgrid_regions_%09i.txt",dataset,season[s],ims);	//for the FAKE detector
+			sprintf(fileInfo,"%s/%s/spgrid_regions_%09i_740.txt",dataset,season[s],ims);	//for the FAKE detector
 			detector->detect(img[s], keypoints[s]);
 			//for (int k = 0;k<keypoints[s].size();k++) std::cout << fileInfo << " " << keypoints[s][k].pt.x << " " << keypoints[s][k].pt.y << " " << keypoints[s][k].angle << " " << keypoints[s][k].octave << " " << keypoints[s][k].response << " " << keypoints[s][k].size << std::endl;
 			

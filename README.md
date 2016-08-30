@@ -9,7 +9,7 @@ Moreover, we provide a simple framework that allows to benchmark the feature ext
 The feature and its evaluation was first presented at European Conference on Mobile robotics [[1](#references)].
 A new, improved version that also allows to combine different detectors and descriptors, is described in a paper that is currently reviewed in <i>Journal of Robotics and Autonomous Systems</i>. 
 
-[![Image features for Visual Teach-and-Repeat Navigation in Changing Environments](https://raw.githubusercontent.com/wiki/gestom/fremen/pics/features.png)](http://youtu.be/xXHRTzi1gZw)
+[![Image features for Visual Teach-and-Repeat Navigation in Changing Environments](https://github.com/gestom/GRIEF/blob/ras-cleanup/papers/demo.jpg)](http://youtu.be/xXHRTzi1gZw)
 <b>Click the picture to see a detailed explanation - make sure you have sound on.</b>
 
 ##Dependencies

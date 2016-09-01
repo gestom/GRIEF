@@ -57,7 +57,6 @@ The datasets we used for evaluation are available for download at my [google dri
 ###Evaluation of results
 1. The scripts, which evaluate the results obtained by runnong the benchmarks, evaluate the detectors and descriptors from the first lines of the files in the <i>settings</i> folder. 
 1. Running <i>./scripts/benchmark_evolution.sh DATASET</i> evaluates every interation of the GRIEF algorithm stored in the <i>grief_history</i> on a given DATASET. 
-1. Running <i>./scripts/benchmark_speeds.sh</i>  creates a latex-formatted table that summarizes the time needed for detection, description and matching.
 1. Running <i>./scripts/precision.sh</i>  creates a latex-formatted table that contains the error rates of the detector/descriptor combinations. 
 1. Running <i>./scripts/draw.sh</i> draws (in xfig and pdf format) the dependence of the heading estimation error on the number of features extracted. 
 

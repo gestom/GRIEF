@@ -33,7 +33,7 @@ bool hist2D = false;
 int difference = 0;
 FILE *output = NULL;
 int maxFeatures=1600;
-int minFeatures=1599;
+int minFeatures=99;
 int numFeatures=maxFeatures;
 
 int numFails[1600/100+1];
@@ -55,6 +55,37 @@ float timeMatching = 0;
 int totalExtracted = 0;
 int totalMatched = 0;
 
+//reads the detections from a file- in our case, used to read Super-pixel grid bounding boxes
+namespace cv{
+
+	class CV_EXPORTS FakeFeatureDetector : public FeatureDetector
+	{
+		public:
+			FakeFeatureDetector(){}
+		protected:
+			virtual void detectImpl( const Mat& image, vector<KeyPoint>& keypoints, const Mat& mask=Mat() ) const;
+	};
+}
+
+void FakeFeatureDetector::detectImpl( const Mat& image, vector<KeyPoint>& keypoints, const Mat& mask ) const
+{
+	FILE *file = fopen(fileInfo,"r");
+	keypoints.clear();
+	float a,b,c,d,x,y;
+	KeyPoint kp;
+	while (feof(file) == 0)
+	{
+		fscanf(file,"%f,%f,%f,%f\n",&a,&b,&c,&d);
+		kp.pt.x = (a+c)/2.0;
+		kp.pt.y = (b+d)/2.0;
+		kp.angle = -1;
+		kp.octave = 1;
+		kp.response = 1;
+		kp.size = sqrt((d-b)*(c-a));
+		keypoints.push_back(kp);
+	}
+	fclose(file);
+}
 
 /*for benchmarking purposes*/
 int getElapsedTime()
@@ -255,43 +286,6 @@ int initializeDateset()
 	return 0;
 }
 
-namespace cv{
-
-	class CV_EXPORTS FakeFeatureDetector : public FeatureDetector
-	{
-		public:
-			// bytes is a length of descriptor in bytes. It can be equal 16, 32 or 64 bytes.
-			FakeFeatureDetector(){}
-
-
-		protected:
-			virtual void detectImpl( const Mat& image, vector<KeyPoint>& keypoints, const Mat& mask=Mat() ) const;
-			//virtual void detectImpl(const Mat& image, vector<KeyPoint>& keypoints, Mat& descriptors) const;
-			//typedef void(*PixelTestFn)(const Mat&, const vector<KeyPoint>&, Mat&);
-	};
-}
-
-void FakeFeatureDetector::detectImpl( const Mat& image, vector<KeyPoint>& keypoints, const Mat& mask ) const
-{
-	FILE *file = fopen(fileInfo,"r");
-	keypoints.clear();
-	float a,b,c,d,x,y;
-	KeyPoint kp;
-	while (feof(file) == 0)
-	{
-		fscanf(file,"%f,%f,%f,%f\n",&a,&b,&c,&d);
-		kp.pt.x = (a+c)/2.0;
-		kp.pt.y = (b+d)/2.0;
-		kp.angle = -1;
-		kp.octave = 1;
-		kp.response = 1;
-		kp.size = sqrt((d-b)*(c-a));
-		keypoints.push_back(kp);
-	}
-	//fprintf(stdout,"MOTOFOKO %s %i\n",fileInfo,keypoints.size());
-	fclose(file);
-}
-
 /*initialize detector*/
 void initializeDetector(char *nameI)
 {
@@ -377,9 +371,8 @@ int main(int argc, char ** argv)
 		{
 			/*detection*/
 			getElapsedTime();
-			sprintf(fileInfo,"%s/%s/spgrid_regions_%09i_740.txt",dataset,season[s],ims);	//for the FAKE detector
+			sprintf(fileInfo,"%s/%s/spgrid_regions_%09i_740.txt",dataset,season[s],ims);
 			detector->detect(img[s], keypoints[s]);
-			//for (int k = 0;k<keypoints[s].size();k++) std::cout << fileInfo << " " << keypoints[s][k].pt.x << " " << keypoints[s][k].pt.y << " " << keypoints[s][k].angle << " " << keypoints[s][k].octave << " " << keypoints[s][k].response << " " << keypoints[s][k].size << std::endl;
 			
 			timeDetection += getElapsedTime();
 

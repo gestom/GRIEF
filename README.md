@@ -1,13 +1,10 @@
-##GRIEF - trainable feature descriptor based on BRIEF 
+##Image Features for Visual Teach-and-Repeat Navigation in Changing Environments
 ======
 
 This project adresses visual-based navigation of mobile robots in outdoor environments.
 In particular, we adress the robustness of image features to seasonal changes in outdoor environments.
-We provide an evolutionary algorithm that allows to train the BRIEF features to be robust to environmental changee.
-We call this feature GRIEF (Generated BRIEF).
-Moreover, we provide a simple framework that allows to benchmark the feature extractors.
-The feature and its evaluation was first presented at European Conference on Mobile robotics [[1](#references)].
-A new, improved version that also allows to combine different detectors and descriptors, is described in a paper that is currently resubmitted in <i>Journal of Robotics and Autonomous Systems</i>. 
+First, we provide a simple framework that allows to benchmark the feature extractors - so far, our benchmark was used by Peer Neubert, who showed that Superpixel Grids (SpG) and Convolutional Neural Networks (CNN) outperform other image features in terms of their robustness to seasonal changes. However, the CNN-based features are computationally expensive.
+So, in this project, we alo provide an evolutionary algorithm that allows to train the BRIEF features to be robust to environmental changes. We call this feature GRIEF (Generated BRIEF). While this feature is slighly less robust that SpG/CNN, it's really fast to calculate. The GRIEF feature and its evaluation was first presented at European Conference on Mobile robotics [[1](#references)]. A new, improved version that also allows to combine different detectors and descriptors, is described in a paper that is currently resubmitted in <i>Journal of Robotics and Autonomous Systems</i>.
 
 [![Image features for Visual Teach-and-Repeat Navigation in Changing Environments](https://github.com/gestom/GRIEF/blob/ras-cleanup/papers/demo.jpg)](https://youtu.be/CEtGG01z4GE)
 <b>Click the picture to see a detailed explanation - make sure you have sound on.</b>

@@ -17,7 +17,7 @@ To install the openCV-nonfree, type this in terminal:
 - sudo add-apt-repository --yes ppa:xqms/opencv-nonfree
 - sudo apt-get update 
 - sudo apt-get install libopencv-nonfree-dev
-- sudo install libopencv-dev
+- sudo apt-getinstall libopencv-dev
 
 Moreover, it uses the <i>gnuplot</i> and <i>transfig</i> packages to draw the results.
 You can install those by:
@@ -27,14 +27,6 @@ You can install those by:
 ##Datasets
 
 The datasets we used for evaluation are available for download at my [google drive](https://drive.google.com/open?id=0B7TY_9FitfdlRXRWWnJ3b0VjOW8) and at [L-CAS owncloud](https://lcas.lincoln.ac.uk/owncloud/shared/datasets/).
-
-##GRIEF training
-
-1. running <b>./scripts/evolveGrief.sh DATASET NUMBER</b> will evolve a NUMBER of GRIEF generations on DATATASET,
-1. training will be speeded-up if you restrict the number of images by creating a smaller dataset just for training,
-1. to reset the GRIEF to be the same as BRIEF <b>./scripts/resetGrief.sh</b>
-1. to switch to the GRIEF that was used in [[1](#references)], run <b>./scripts/restoreGrief.sh</b>
-1. to switch to an arbitrary GRIEF that was generated during the training, run <b>./scripts/restoreGrief.sh [grief_file]</b>. The <i>grief_files</i>  are in <i>grief_history</i> directory, which contains comparisons for the individual GRIEF generations and their fitness.
 
 ##Feature evaluation
 
@@ -57,6 +49,13 @@ The datasets we used for evaluation are available for download at my [google dri
 1. Running <i>./scripts/precision.sh</i>  creates a latex-formatted table that contains the error rates of the detector/descriptor combinations. 
 1. Running <i>./scripts/draw.sh</i> draws (in xfig and pdf format) the dependence of the heading estimation error on the number of features extracted. 
 
+##GRIEF training
+
+1. running <b>./scripts/evolveGrief.sh DATASET NUMBER</b> will evolve a NUMBER of GRIEF generations on DATATASET,
+1. training will be speeded-up if you restrict the number of images by creating a smaller dataset just for training,
+1. to reset the GRIEF to be the same as BRIEF <b>./scripts/resetGrief.sh</b>
+1. to switch to the GRIEF that was used in [[1](#references)], run <b>./scripts/restoreGrief.sh</b>
+1. to switch to an arbitrary GRIEF that was generated during the training, run <b>./scripts/restoreGrief.sh [grief_file]</b>. The <i>grief_files</i>  are in <i>grief_history</i> directory, which contains comparisons for the individual GRIEF generations and their fitness.
 
 ##References
 ======

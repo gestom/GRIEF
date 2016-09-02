@@ -51,7 +51,7 @@ The datasets we used for evaluation are available for download at my [google dri
 
 ##GRIEF training
 
-1. running <b>./scripts/evolveGrief.sh DATASET NUMBER</b> will evolve a NUMBER of GRIEF generations on DATATASET,
+1. running <b>./scripts/evolveGrief.sh DATASET NUMBER</b> will evolve a NUMBER of GRIEF generations on DATATASET, e.g. <b>./scripts/evolveGrief.sh GRIEF-dataset/michigan 100</b>
 1. training will be speeded-up if you restrict the number of images by creating a smaller dataset just for training,
 1. to reset the GRIEF to be the same as BRIEF <b>./scripts/resetGrief.sh</b>
 1. to switch to the GRIEF that was used in [[1](#references)], run <b>./scripts/restoreGrief.sh</b>

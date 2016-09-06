@@ -40,14 +40,14 @@ The datasets we used for evaluation are available for download at my [google dri
 ###Running benchmarks 
 
 1. The first lines of the <i>detectors</i> and <i>descriptors</i> files in the <i>settings</i> folder contain the detectors and descriptors that will be used for the benchmark. You can select the detectors and descriptors for the benchmark by editing these files. Ty to modify the first line of the <i>settings/detectors</i> so that it contains <i>star up-sift</i>, and the first line of the <i>settings/descriptors</i> so that it contains <i>brief root-sift</i>.
-1. To run a benchmark of all detector/descriptor combinations  : <b>./scripts/match_all.sh dataset</b>. For example, running the <b>./scripts/match_all.sh GRIEF-datasets/michigan</b> with the files set accodring to the previous point will test four image features: <i>star+brief</i>, <i>star+root-sift</i>, <i>up-sift+brief</i> and <i>up-sift+root-sift</i> on the <i>GRIEF-datasets/michigan</i> dataset.
-1. To run a benchmark that will test the detector/descriptor pairs in a successive way, run <b>./scripts/match.sh dataset</b>. That is, running the <b>./scripts/match.sh GRIEF-datasets/michigan</b> with the <i>settings/detectors</i> and <i>settings/descriptors</i> files set according to point 1 will test <i>star+brief</i> and <i>up-sift+root-sift</i> image features.
+1. To run a benchmark of all detector/descriptor combinations: <b>./scripts/match_all.sh DATASET</b>. For example, running the <b>./scripts/match_all.sh GRIEF-datasets/michigan</b> with the files set according to the previous point will test four image features: <i>star+brief</i>, <i>star+root-sift</i>, <i>up-sift+brief</i> and <i>up-sift+root-sift</i> on the <i>GRIEF-datasets/michigan</i> dataset.
+1. To run a benchmark that will test the detector/descriptor pairs in a successive way, run <b>./scripts/match.sh DATASET</b>. That is, running the <b>./scripts/match.sh GRIEF-datasets/michigan</b> with the <i>settings/detectors</i> and <i>settings/descriptors</i> files set according to point 1 will test <i>star+brief</i> and <i>up-sift+root-sift</i> image features.
 
 ###Evaluation of results
 1. The scripts, which evaluate the results obtained by runnong the benchmarks, evaluate the detectors and descriptors from the first lines of the files in the <i>settings</i> folder. 
-1. Running <i>./scripts/benchmark_evolution.sh DATASET</i> evaluates every iteration of the GRIEF algorithm stored in the <i>grief_history</i> on a given DATASET.
-1. Running <i>./scripts/benchmark_precision.sh DATASET</i>  creates a latex-formatted table that contains the error rates of the detector/descriptor combinations. 
-1. Running <i>./scripts/draw.sh DATASET</i> draws the dependence of the heading estimation error on the number of features extracted and stores the results in rates.fig and rates.pdf files.
+1. Running <b>./scripts/benchmark_evolution.sh DATASET</b> evaluates every iteration of the GRIEF algorithm stored in the <i>grief_history</i> on a given DATASET.
+1. Running <b>./scripts/benchmark_precision.sh DATASET</b>  creates a latex-formatted table that contains the error rates of the detector/descriptor combinations. 
+1. Running <i>./scripts/draw.sh DATASET</i> draws the dependence of the heading estimation error on the number of features extracted and stores the results in <i>rates.fig</i> and <i>rates.pdf</i> files.
 
 ##GRIEF training
 

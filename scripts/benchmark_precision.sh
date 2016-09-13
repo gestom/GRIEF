@@ -1,4 +1,5 @@
 #generates a table with error rates of different descriptor/detector combinations
+export LC_NUMERIC="en_US.UTF-8"		#to enforce decimal dot
 
 printf "  \t" -
 for des in $(cat settings/descriptors |head -n 1|tr ' ' \\n);

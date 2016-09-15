@@ -60,3 +60,7 @@ The datasets we used for evaluation are available for download at my [google dri
 ##References
 ======
 1. T.Krajnik, P.Cristoforis, M.Nitsche, K. Kusumam, T.Duckett: <b>[Image features and seasons revisited.](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_ECMR_2015.pdf)</b> ECMR 2015. <i>[bibtex](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_ECMR_2015.bib)</i>.
+
+##Acknowledgements
+======
+This research was funded by the EU ICT project 600623 ‘STRANDS’.

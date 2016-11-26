@@ -4,7 +4,10 @@
 This project adresses visual-based navigation of mobile robots in outdoor environments.
 In particular, we adress the robustness of image features to seasonal changes in outdoor environments.
 First, we provide a simple framework that allows to benchmark the feature extractors - so far, our benchmark was used by Peer Neubert, who showed that Superpixel Grids (SpG) and Convolutional Neural Networks (CNN) outperform other image features in terms of their robustness to seasonal changes. However, the CNN-based features are computationally expensive.
-So, in this project, we alo provide an evolutionary algorithm that allows to train the BRIEF features to be robust to environmental changes. We call this feature GRIEF (Generated BRIEF). While this feature is slighly less robust that SpG/CNN, it's really fast to calculate. The GRIEF feature and its evaluation was first presented at European Conference on Mobile robotics [[1](#references)]. A new, improved version that also allows to combine different detectors and descriptors, is described in a paper that is currently resubmitted in <i>Journal of Robotics and Autonomous Systems</i>.
+So, in this project, we also provide an evolutionary algorithm that allows to train the BRIEF features to be robust to environmental changes.
+We call this feature GRIEF (Generated BRIEF).
+While this feature is slighly less robust that SpG/CNN, it's really fast to calculate. 
+The GRIEF feature and its evaluation is described in detail in a paper published in the <i>Journal of Robotics and Autonomous Systems</i> [[1](#references)] and it was also presented at European Conference on Mobile robotics [[2](#references)].
 
 [![Image features for Visual Teach-and-Repeat Navigation in Changing Environments](https://github.com/gestom/GRIEF/blob/master/papers/demo.jpg)](https://youtu.be/CEtGG01z4GE)
 <b>Click the picture to see a detailed explanation - make sure you have sound on.</b>
@@ -59,6 +62,7 @@ The datasets we used for evaluation are available for download at my [google dri
 
 ##References
 ======
+1. T.Krajnik, P.Cristoforis, K. Kusumam, P.Neubert, T.Duckett: <b>[Image features for Visual Teach-and-Repeat Navigation in Changing Environments.](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_RAS_2016.pdf)</b> Journal of Robotics and Autonomous Systems, 2016 <i>[bibtex](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_RAS_2016.bib)</i>.
 1. T.Krajnik, P.Cristoforis, M.Nitsche, K. Kusumam, T.Duckett: <b>[Image features and seasons revisited.](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_ECMR_2015.pdf)</b> ECMR 2015. <i>[bibtex](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_ECMR_2015.bib)</i>.
 
 ======

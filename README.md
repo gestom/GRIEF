@@ -47,17 +47,17 @@ The datasets we used for evaluation are available for download at my [google dri
 1. To run a benchmark that will test the detector/descriptor pairs in a successive way, run <b>./scripts/match.sh DATASET</b>. That is, running the <b>./scripts/match.sh GRIEF-datasets/michigan</b> with the <i>settings/detectors</i> and <i>settings/descriptors</i> files set according to point 1 will test <i>star+brief</i> and <i>up-sift+root-sift</i> image features.
 
 ###Evaluation of results
-1. The scripts, which evaluate the results obtained by runnong the benchmarks, evaluate the detectors and descriptors from the first lines of the files in the <i>settings</i> folder. 
+1. The scripts, which evaluate the results obtained by running the benchmarks, evaluate the detectors and descriptors from the first lines of the files in the <i>settings</i> folder.
 1. Running <b>./scripts/benchmark_evolution.sh DATASET</b> evaluates every iteration of the GRIEF algorithm stored in the <i>grief_history</i> on a given DATASET.
 1. Running <b>./scripts/benchmark_precision.sh DATASET</b>  creates a latex-formatted table that contains the error rates of the detector/descriptor combinations. 
 1. Running <b>./scripts/draw.sh DATASET</b> draws the dependence of the heading estimation error on the number of features extracted and stores the results in <i>rates.fig</i> and <i>rates.pdf</i> files.
 
 ##GRIEF training
 
-1. to initiate the training, you need to set the initial comparisons of the GRIEF feature. Either reset the GRIEF to be the same as BRIEF by <b>./scripts/resetGrief.sh</b> or switch to the GRIEF that was used in [[1](#references)] by running <b>./scripts/restoreGrief.sh</b>,
-1. running <b>./scripts/evolveGrief.sh DATASET NUMBER</b> will evolve a NUMBER of GRIEF generations on DATATASET, e.g. <b>./scripts/evolveGrief.sh GRIEF-dataset/michigan 100</b>,
-1. training will be speeded-up if you restrict the number of images by creating a smaller dataset just for training,
-1. to switch to an arbitrary GRIEF that was generated during the training, run <b>./scripts/restoreGrief.sh [grief_file]</b>. The <i>grief_files</i>  are in <i>grief_history</i> directory, which contains comparisons for the individual GRIEF generations and their fitness.
+1. To initiate the training, you need to set the initial comparisons of the GRIEF feature. Either reset the GRIEF to be the same as BRIEF by <b>./scripts/resetGrief.sh</b> or switch to the GRIEF that was used in [[1](#references)] by running <b>./scripts/restoreGrief.sh</b>.
+1. Running <b>./scripts/evolveGrief.sh DATASET NUMBER</b> will evolve a NUMBER of GRIEF generations on DATATASET, e.g. <b>./scripts/evolveGrief.sh GRIEF-dataset/michigan 100</b>.
+1. Training will be speeded-up if you restrict the number of images by creating a smaller dataset just for training.
+1. To switch to an arbitrary GRIEF that was generated during the training, run <b>./scripts/restoreGrief.sh [grief_file]</b>. The <i>grief_files</i>  are in <i>grief_history</i> directory, which contains comparisons for the individual GRIEF generations and their fitness.
 
 ##References
 ======

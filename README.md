@@ -1,5 +1,4 @@
 ## Image Features for Visual Teach-and-Repeat Navigation in Changing Environments
-======
 
 This project adresses visual-based navigation of mobile robots in outdoor environments.
 In particular, we adress the robustness of image features to seasonal changes in outdoor environments.
@@ -60,10 +59,8 @@ The datasets we used for evaluation are available for download at my [google dri
 1. To switch to an arbitrary GRIEF that was generated during the training, run <b>./scripts/restoreGrief.sh [grief_file]</b>. The <i>grief_files</i>  are in <i>grief_history</i> directory, which contains comparisons for the individual GRIEF generations and their fitness.
 
 ## References
-======
 1. T.Krajnik, P.Cristoforis, K. Kusumam, P.Neubert, T.Duckett: <b>[Image features for Visual Teach-and-Repeat Navigation in Changing Environments.](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_RAS_2016.pdf)</b> Journal of Robotics and Autonomous Systems, 2016 <i>[bibtex](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_RAS_2016.bib)</i>.
 1. T.Krajnik, P.Cristoforis, M.Nitsche, K. Kusumam, T.Duckett: <b>[Image features and seasons revisited.](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_ECMR_2015.pdf)</b> ECMR 2015. <i>[bibtex](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_ECMR_2015.bib)</i>.
 
-======
 ## Acknowledgements
 This research was funded by the EU ICT project 600623 ‘STRANDS’.

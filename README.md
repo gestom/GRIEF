@@ -19,7 +19,7 @@ To install the openCV-nonfree, type this in terminal:
 - sudo add-apt-repository --yes ppa:xqms/opencv-nonfree
 - sudo apt-get update 
 - sudo apt-get install libopencv-nonfree-dev
-- sudo apt-getinstall libopencv-dev
+- sudo apt-get install libopencv-dev
 
 Moreover, it uses the <i>gnuplot</i> and <i>transfig</i> packages to draw the results.
 You can install those by:

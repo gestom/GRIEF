@@ -116,6 +116,7 @@ GriefDescriptorExtractor::GriefDescriptorExtractor(int bytes) :
     }
 }
 
+
 int GriefDescriptorExtractor::descriptorSize() const
 {
     return bytes_;

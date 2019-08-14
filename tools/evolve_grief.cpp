@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
-#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/xfeatures2d.hpp>
 #include <stdio.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <fstream>
@@ -335,16 +335,17 @@ int main(int argc, char ** argv)
 		Mat dp;
 
 		cout << "Detecting STAR features and extracting genetically modified BRIEF descriptors"  << endl;
-		StarFeatureDetector detector(45,detectorThreshold,10,8,5);		//TODO make this selectable
+		Ptr<xfeatures2d::StarDetector> detector = cv::xfeatures2d::StarDetector::create(45,detectorThreshold,10,8,5);		//TODO make this selectable
 		//FakeFeatureDetector detector;		//TODO make this selectable
 		//BRISK detector(0,4);
-		GriefDescriptorExtractor extractor(griefDescriptorLength/8);
+		Ptr<GriefDescriptorExtractor> extractor = new GriefDescriptorExtractor(griefDescriptorLength/8);
 
 		time0 = getTime();
 		for (int i = 0;i<numSeasons;i++){
 			sprintf(fileInfo,"%s/season_%02i/spgrid_regions_%09i.txt",argv[1],i,location);
-			detector.detect(img[i], keypoints[i]);
-			extractor.compute(img[i], keypoints[i], descriptors[i]);
+			detector->detect(img[i], keypoints[i]);
+			extractor->computeImpl(img[i], keypoints[i], descriptors[i]);
+
 			printf("Location %i season %i, extracted %i\n",location,i,(int)keypoints[i].size());
 		}
 		time2 = time1 = getTime();

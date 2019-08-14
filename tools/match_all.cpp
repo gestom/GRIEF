@@ -1,14 +1,16 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <opencv2/opencv.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/nonfree/features2d.hpp>
+#include "opencv2/core.hpp"
+#ifdef HAVE_OPENCV_XFEATURES2D
+#include "opencv2/highgui.hpp"
+#include "opencv2/features2d.hpp"
+#include "opencv2/xfeatures2d.hpp"
 #include <stdio.h>
-#include <opencv2/highgui/highgui.hpp>
 #include <fstream>
 #include "grief/grief.h"
 #include <dirent.h>
+#include <vector>
 
 
 #define CROSSCHECK true 
@@ -45,8 +47,9 @@ char descriptorName[1000];
 char detectorName[1000];
 char fileInfo[1000];
 
-FeatureDetector     *detector = NULL;
-DescriptorExtractor *descriptor = NULL;
+Ptr<FeatureDetector> detector;
+Ptr<DescriptorExtractor> descriptor;
+GriefDescriptorExtractor *griefDescriptor = NULL;
 
 /*benchmarking time*/
 float timeDetection = 0;
@@ -296,16 +299,16 @@ void initializeDetector(char *nameI)
 	if (strncmp("norm-",name,5)==0)	{upright = false;strcpy(name,&nameI[5]);}
 
 	/*detectors*/
-	if (strcmp("sift",  name)==0)  	detector = new SIFT(0,3,0.0,10,1.6);
-	if (strcmp("surf",  name)==0)  	detector = new SURF(0);
-	if (strcmp("star",  name)==0)  	detector = new StarFeatureDetector(45,0,10,8,5);
-	if (strcmp("brisk", name)==0) 	detector = new BRISK(0,4);
-	if (strcmp("orb",   name)==0) 	detector = new OrbFeatureDetector(maxFeatures,1.2f,8,31,0,2,0,31); 
-	if (strcmp("fast",  name)==0)	detector = new FastFeatureDetector(0,true);
+	if (strcmp("sift",  name)==0)  	detector = xfeatures2d::SiftFeatureDetector::create(0,3,0.0,10,1.6);
+	if (strcmp("surf",  name)==0)  	detector = xfeatures2d::SurfFeatureDetector::create(400);	
+	if (strcmp("star",  name)==0)  	detector = xfeatures2d::StarDetector::create(45,0,10,8,5);
+	if (strcmp("brisk", name)==0) 	detector = BRISK::create(0,4);
+	if (strcmp("orb",   name)==0) 	detector = ORB::create(maxFeatures,1.2f,8,31,0,2,0,31); 
+	if (strcmp("fast",  name)==0)	detector = FastFeatureDetector::create(0,true); 
 
 	/*new ones*/
-	if (strcmp("mser",  name)==0)	detector = new MSER(2);
-	if (strcmp("gftt",  name)==0)	detector = new GFTTDetector(1600,0.01,1,3,false,0.04);
+	if (strcmp("mser",  name)==0)	detector = MSER::create(2);
+	if (strcmp("gftt",  name)==0)	detector = GFTTDetector::create(1600,0.01,1,3,false,0.04);
 	if (strcmp("fake",  name)==0)	detector = new FakeFeatureDetector();
 }
 
@@ -317,13 +320,13 @@ void initializeDescriptor(char *nameI)
 	/*modifiers*/
 	if (strncmp("root-",name,5)==0){normalizeSift= true;strcpy(name,&nameI[5]);}
 	/*descriptors*/
-	if (strcmp("sift",  name)==0)  	{norm2=true;descriptor = new SIFT(0,3,0.0,10,1.6);}
-	if (strcmp("surf",  name)==0)   {norm2=true;descriptor = new SURF(0);}
-	if (strcmp("brisk", name)==0)   {norm2=false;descriptor = new BRISK(0,4);}
-	if (strcmp("brief", name)==0)   {norm2=false;descriptor = new BriefDescriptorExtractor(32);}
-	if (strcmp("grief", name)==0)   {norm2=false;descriptor = new GriefDescriptorExtractor(32);}
-	if (strcmp("orb",   name)==0)   {norm2=false;descriptor = new OrbFeatureDetector(maxFeatures,1.2f,8,31,0,2,0,31);} 
-	if (strcmp("freak",  name)==0)	{norm2=false;descriptor = new FREAK();}
+	if (strcmp("sift",  name)==0)  	{norm2=true;descriptor = xfeatures2d::SiftDescriptorExtractor::create(0,3,0.0,10,1.6);}
+	if (strcmp("surf",  name)==0)   {norm2=true;descriptor = xfeatures2d::SurfDescriptorExtractor::create(0);}
+	if (strcmp("brisk", name)==0)   {norm2=false;descriptor = BRISK::create(0,4);}
+	if (strcmp("brief", name)==0)   {norm2=false;descriptor = xfeatures2d::BriefDescriptorExtractor::create(32);}
+	if (strcmp("grief", name)==0)   {norm2=false;griefDescriptor = new GriefDescriptorExtractor(32);}
+	if (strcmp("orb",   name)==0)   {norm2=false;descriptor = ORB::create(maxFeatures,1.2f,8,31,0,2,0,31);} 
+	if (strcmp("freak",  name)==0)	{norm2=false;descriptor = xfeatures2d::FREAK::create();}
 }
 
 int main(int argc, char ** argv) 
@@ -342,17 +345,16 @@ int main(int argc, char ** argv)
 	memset(numFeats,0,(maxFeatures/100+1)*sizeof(int));	
 	int totalTests = 0;
 	int numPictures = 0;
-	for (int ims=0;ims<numLocations;ims++)
-	{
-		delete detector;
-		delete descriptor;
+	for (int ims=0;ims<numLocations;ims++) {
+		detector.release();
+		descriptor.release();
+		delete griefDescriptor;
 		char filename[100];
 		Mat im[seasons];
 		Mat img[seasons];
 		Mat descriptors[seasons];
 		vector<KeyPoint> keypoints[seasons];
-		for (int s = 0;s<seasons;s++)
-		{
+		for (int s = 0;s<seasons;s++) {
 			sprintf(filename,"%s/%s/%09i.bmp",dataset,season[s],ims);
 			im[s] =  imread(filename, CV_LOAD_IMAGE_COLOR);
 			img[s] = imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
@@ -366,16 +368,14 @@ int main(int argc, char ** argv)
 		initializeDescriptor(descriptorName);
 		KeyPoint kp;
 		Mat dp;
-
 		for (int s = 0;s<seasons;s++)
 		{
 			/*detection*/
 			getElapsedTime();
 			sprintf(fileInfo,"%s/%s/spgrid_regions_%09i_740.txt",dataset,season[s],ims);
 			detector->detect(img[s], keypoints[s]);
-			
-			timeDetection += getElapsedTime();
 
+			timeDetection += getElapsedTime();
 			sort(keypoints[s].begin(),keypoints[s].end(),compare_response);
 			/*extraction*/
 			getElapsedTime();
@@ -387,14 +387,13 @@ int main(int argc, char ** argv)
 				/*providing a fake octave*/
 				for (unsigned int j = 0;j<keypoints[s].size();j++) keypoints[s][j].octave = 1;
 			}
-
-			descriptor->compute(img[s],keypoints[s],descriptors[s]);
+			if(griefDescriptor != NULL) griefDescriptor->computeImpl(img[s],keypoints[s],descriptors[s]);
+			else descriptor->compute(img[s],keypoints[s],descriptors[s]);
 			if (normalizeSift) rootSift(&descriptors[s]);	
 			timeDescription += getElapsedTime();
 			totalExtracted += descriptors[s].rows;
 			numPictures++;
 		}
-
 		for (int nFeatures=maxFeatures;nFeatures>=minFeatures;nFeatures-=100)
 		{
 			for (int a=0;a<seasons;a++){
@@ -444,8 +443,7 @@ int main(int argc, char ** argv)
 							}
 
 							//create the histogram
-							for(size_t i = 0; i < matches.size(); i++ )
-							{
+							for(size_t i = 0; i < matches.size(); i++ ) {
 								int i1 = matches[i].queryIdx;
 								int i2 = matches[i].trainIdx;
 								int iXO = (int)(keypoints1[i1].pt.x-keypoints2[i2].pt.x + width);
@@ -598,6 +596,7 @@ int main(int argc, char ** argv)
 			}
 		}
 	}
+	std::cout << "Tests have finished.\n";
 	if (update) fclose(output);
 	int numPairs = numLocations*seasons*(seasons-1)/2;
 	printf("%i %i\n",totalTests,numLocations*seasons*(seasons-1)/2);
@@ -616,3 +615,11 @@ int main(int argc, char ** argv)
 	delete offsetY;
 	return 0;
 }
+
+#else
+int main()
+{
+    std::cout << "This tutorial code needs the xfeatures2d contrib module to be run." << std::endl;
+    return 0;
+}
+#endif

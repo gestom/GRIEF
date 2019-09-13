@@ -32,10 +32,10 @@ const int width = 500;
 const int height = 100;
 int histogram2D[width*2+granularity][height*2+granularity];
 bool hist2D = false;
-int difference = 0;
+float difference = 0;
 FILE *output = NULL;
-int maxFeatures=1600;
-int minFeatures=99;
+int maxFeatures=1500;
+int minFeatures=1499;
 int numFeatures=maxFeatures;
 
 int numFails[1600/100+1];
@@ -324,7 +324,7 @@ void initializeDescriptor(char *nameI)
 	if (strcmp("surf",  name)==0)   {norm2=true;descriptor = xfeatures2d::SurfDescriptorExtractor::create(0);}
 	if (strcmp("brisk", name)==0)   {norm2=false;descriptor = BRISK::create(0,4);}
 	if (strcmp("brief", name)==0)   {norm2=false;descriptor = xfeatures2d::BriefDescriptorExtractor::create(32);}
-	if (strcmp("grief", name)==0)   {norm2=false;griefDescriptor = new GriefDescriptorExtractor(32);}
+//	if (strcmp("grief", name)==0)   {norm2=false;griefDescriptor = new GriefDescriptorExtractor(32);}
 	if (strcmp("orb",   name)==0)   {norm2=false;descriptor = ORB::create(maxFeatures,1.2f,8,31,0,2,0,31);} 
 	if (strcmp("freak",  name)==0)	{norm2=false;descriptor = xfeatures2d::FREAK::create();}
 }
@@ -345,10 +345,15 @@ int main(int argc, char ** argv)
 	memset(numFeats,0,(maxFeatures/100+1)*sizeof(int));	
 	int totalTests = 0;
 	int numPictures = 0;
+
+	char detailFileName[100];
+	sprintf(detailFileName,"%s/results/%s_%s.details",dataset,detectorName,descriptorName);
+	FILE* detailFile = fopen(detailFileName,"w+");
+
 	for (int ims=0;ims<numLocations;ims++) {
 		detector.release();
 		descriptor.release();
-		delete griefDescriptor;
+//		delete griefDescriptor;
 		char filename[100];
 		Mat im[seasons];
 		Mat img[seasons];
@@ -387,8 +392,9 @@ int main(int argc, char ** argv)
 				/*providing a fake octave*/
 				for (unsigned int j = 0;j<keypoints[s].size();j++) keypoints[s][j].octave = 1;
 			}
-			if(griefDescriptor != NULL) griefDescriptor->computeImpl(img[s],keypoints[s],descriptors[s]);
-			else descriptor->compute(img[s],keypoints[s],descriptors[s]);
+//			if(griefDescriptor != NULL) griefDescriptor->computeImpl(img[s],keypoints[s],descriptors[s]);
+//			else 
+			descriptor->compute(img[s],keypoints[s],descriptors[s]);
 			if (normalizeSift) rootSift(&descriptors[s]);	
 			timeDescription += getElapsedTime();
 			totalExtracted += descriptors[s].rows;
@@ -523,7 +529,7 @@ int main(int argc, char ** argv)
 							//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
 
 						}
-						if (histMax > 0) difference = (sumDev/histMax)+(offsetX[ims+numLocations*a]-offsetX[ims+numLocations*b]); else difference = 1000;
+						if (histMax > 0) difference = ((float)sumDev/histMax)+(offsetX[ims+numLocations*a]-offsetX[ims+numLocations*b]); else difference = 1000;
 						//if (histMax > 0) printf("\nDirection histogram %i %i %i\n",-(sumDev/histMax),histMax,auxMax); else printf("\nDirection histogram 1000 0 0\n");
 						//if (histMax > 0) printf("%05i %05i %i %i %i %i %i\n",imNum1,imNum2,difference,-(sumDev/histMax),-offsetX[ims],histMax,auxMax); else printf("%05i %05i 1000 1000 %i 0 0\n",imNum1,imNum2,offsetX[ims]);
 						if (drawAll==false && update) draw = (abs(difference) > 35); else draw = drawAll;
@@ -535,7 +541,8 @@ int main(int argc, char ** argv)
 						draw = update;
 					}
 					if (fabs(difference) > 35) numFails[numFeatures/100]++;
-					printf("Report: %s %s %09i : %i : %i : %.f - ",season[a],season[b],totalTests,numFails[numFeatures/100],fabs(difference) > 35,fabs(difference));
+					printf("Report: %s %s %09i : %i : %i : %.3f - ",season[a],season[b],totalTests,numFails[numFeatures/100],fabs(difference) > 35,fabs(difference));
+					fprintf(detailFile,"Report: %s %s %09i : %i : %i : %.3f \n",season[a],season[b],totalTests,numFails[numFeatures/100],fabs(difference) > 35,fabs(difference));
 					if (drawAll || save || (draw&&(fabs(difference) > 35)))
 					{
 						if (fabs(difference) > 35) printf("DIFF: %i %i\n",(sumDev/histMax),-(offsetX[ims+numLocations*a]-offsetX[ims+numLocations*b]));
@@ -598,6 +605,7 @@ int main(int argc, char ** argv)
 	}
 	std::cout << "Tests have finished.\n";
 	if (update) fclose(output);
+	fclose(detailFile);
 	int numPairs = numLocations*seasons*(seasons-1)/2;
 	printf("%i %i\n",totalTests,numLocations*seasons*(seasons-1)/2);
 	numFails[0] = numPairs;

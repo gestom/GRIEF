@@ -188,8 +188,8 @@ void distinctiveMatch(const Mat& descriptors1, const Mat& descriptors2, vector<D
 
 int *seq1;
 int *seq2;
-int *offsetX;
-int *offsetY;
+float *offsetX;
+float *offsetY;
 int numLocations = 0;
 
 void rootSift(Mat *m)
@@ -208,7 +208,8 @@ int initializeDateset()
 	DIR *dpdf;
 	struct dirent *epdf;
 	FILE* file; 
-	int dum1,dum2,dum3,dum4; //for reading from a file
+	float dum1,dum2;
+	int dum3,dum4; //for reading from a file
 	char filename[1000];
 
 	/*how many seasons are in the dataset?*/
@@ -251,7 +252,7 @@ int initializeDateset()
 		dum3 = 0;
 		while (feof(file)==0)
 		{
-			if (fscanf(file,"%i %i\n",&dum1,&dum2)!=2)
+			if (fscanf(file,"%f %f\n",&dum1,&dum2)!=2)
 			{
 				fprintf(stderr,"File %s corrupt at line %i!\n",filename,dum3);
 				return -1;
@@ -269,8 +270,8 @@ int initializeDateset()
 	numLocations = dum4;
 	printf("Dataset seems to be OK: %i seasons and %i locations\n",seasons,numLocations);
 	/*allocate variables*/
-	offsetX = (int*)malloc(sizeof(int)*numLocations*seasons);
-	offsetY = (int*)malloc(sizeof(int)*numLocations*seasons);
+	offsetX = (float*)malloc(sizeof(float)*numLocations*seasons);
+	offsetY = (float*)malloc(sizeof(float)*numLocations*seasons);
 
 	/*read offsets*/
 	for (int i = 0;i<seasons;i++){
@@ -279,7 +280,7 @@ int initializeDateset()
 		dum3 = 0;
 		while (feof(file) == 0)
 		{
-			dum4 = fscanf(file,"%i\t%i\n",&dum1,&dum2);
+			dum4 = fscanf(file,"%f\t%f\n",&dum1,&dum2);
 			offsetX[i*numLocations+dum3] = -dum1;
 			offsetY[i*numLocations+dum3] = -dum2;
 			dum3++;
@@ -537,7 +538,7 @@ int main(int argc, char ** argv)
 						//if (histMax > 0) fprintf(output,"%05i %05i %i %i %i %i %i\n",imNum1,imNum2,-(sumDev/histMax)+offset[ims],-(sumDev/histMax),-offset[ims],histMax,auxMax); else fprintf(output,"%05i %05i 1000 1000 %i 0 0\n",imNum1,imNum2,offset[ims]);
 					}else{
 						difference = 1000;
-						printf("%05i %05i 1000 1000 %i 0 0\n",ims,ims,offsetX[ims]);
+						printf("%05i %05i 1000 1000 %.1f 0 0\n",ims,ims,offsetX[ims]);
 						draw = update;
 					}
 					if (fabs(difference) > 35) numFails[numFeatures/100]++;

@@ -29,6 +29,5 @@ do
 			echo $a $c $s $h >>../features\_$j\_$k.txt
 		done
 		cd ..
-		echo Second $j\_$k 
 	done
 done

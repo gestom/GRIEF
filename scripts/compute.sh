@@ -1,4 +1,4 @@
-for j in stromovka 
+for j in stromovka nclt 
 do	
 	for k in 00 01 10
 	do

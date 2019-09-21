@@ -13,7 +13,6 @@
 #include <vector>
 
 
-#define CROSSCHECK true 
 #define VERTICAL_LIMIT 100 
 bool norm2 =true;
 bool upright =true;
@@ -108,8 +107,38 @@ bool compare_response(KeyPoint first, KeyPoint second)
 	  if (first.response > second.response) return true; else return false;
 }
 
+void distinctiveMatch(const Mat& descriptors1, const Mat& descriptors2, vector<DMatch>& matches, bool norm2)
+{
+	DescriptorMatcher *matcher;
+
+	if (norm2){
+		matcher = new BFMatcher(cv::NORM_L2,  false);
+	}else{ 
+		matcher = new BFMatcher(cv::NORM_HAMMING, false);
+	}
+	vector< vector<DMatch> > fwmatches,revmatches;
+	try{
+		matcher->knnMatch( descriptors1, descriptors2, fwmatches,  1);
+		matcher->knnMatch( descriptors2, descriptors1, revmatches, 1);
+	}catch (Exception& e){
+		matches.clear();
+		fprintf(stderr,"Feature desriptors from the map and in from the image are not compatible.\n");
+	}
+
+	/*perform cross matching*/ 
+	matches.clear();
+	for (size_t i = 0; i < fwmatches.size(); i++)
+	{
+		for (size_t j = 0; j < revmatches.size(); j++){
+			if (fwmatches[i][0].trainIdx == revmatches[j][0].queryIdx && fwmatches[i][0].queryIdx == revmatches[j][0].trainIdx) matches.push_back(fwmatches[i][0]); 
+		}
+	}
+
+}
+
+
 /*matching scheme*/
-void distinctiveMatch(const Mat& descriptors1, const Mat& descriptors2, vector<DMatch>& matches, bool norm2= true, bool crossCheck=false)
+void distinctiveMatchA(const Mat& descriptors1, const Mat& descriptors2, vector<DMatch>& matches, bool norm2= true, bool crossCheck=false)
 {
    DescriptorMatcher *descriptorMatcher;
    vector<vector<DMatch> > allMatches1to2, allMatches2to1;
@@ -325,7 +354,7 @@ void initializeDescriptor(char *nameI)
 	if (strcmp("surf",  name)==0)   {norm2=true;descriptor = xfeatures2d::SurfDescriptorExtractor::create(0);}
 	if (strcmp("brisk", name)==0)   {norm2=false;descriptor = BRISK::create(0,4);}
 	if (strcmp("brief", name)==0)   {norm2=false;descriptor = xfeatures2d::BriefDescriptorExtractor::create(32);}
-//	if (strcmp("grief", name)==0)   {norm2=false;griefDescriptor = new GriefDescriptorExtractor(32);}
+	if (strcmp("grief", name)==0)   {norm2=false;griefDescriptor = new GriefDescriptorExtractor(32);}
 	if (strcmp("orb",   name)==0)   {norm2=false;descriptor = ORB::create(maxFeatures,1.2f,8,31,0,2,0,31);} 
 	if (strcmp("freak",  name)==0)	{norm2=false;descriptor = xfeatures2d::FREAK::create();}
 }
@@ -354,7 +383,7 @@ int main(int argc, char ** argv)
 	for (int ims=0;ims<numLocations;ims++) {
 		detector.release();
 		descriptor.release();
-//		delete griefDescriptor;
+		delete griefDescriptor;
 		char filename[100];
 		Mat im[seasons];
 		Mat img[seasons];
@@ -393,9 +422,7 @@ int main(int argc, char ** argv)
 				/*providing a fake octave*/
 				for (unsigned int j = 0;j<keypoints[s].size();j++) keypoints[s][j].octave = 1;
 			}
-//			if(griefDescriptor != NULL) griefDescriptor->computeImpl(img[s],keypoints[s],descriptors[s]);
-//			else 
-			descriptor->compute(img[s],keypoints[s],descriptors[s]);
+			if(griefDescriptor != NULL) griefDescriptor->computeImpl(img[s],keypoints[s],descriptors[s]); else descriptor->compute(img[s],keypoints[s],descriptors[s]);
 			if (normalizeSift) rootSift(&descriptors[s]);	
 			timeDescription += getElapsedTime();
 			totalExtracted += descriptors[s].rows;
@@ -430,7 +457,7 @@ int main(int argc, char ** argv)
 					matches.clear();
 					inliers_matches.clear();
 					getElapsedTime();
-					if (descriptors1.rows*descriptors2.rows > 0) distinctiveMatch(descriptors1, descriptors2, matches, norm2, CROSSCHECK);
+					if (descriptors1.rows*descriptors2.rows > 0) distinctiveMatch(descriptors1, descriptors2, matches, norm2);
 
 					//benchmark unrestricted detector sets only 
 					timeMatching += getElapsedTime();
@@ -546,7 +573,7 @@ int main(int argc, char ** argv)
 					fprintf(detailFile,"Report: %s %s %09i : %i : %i : %.3f \n",season[a],season[b],totalTests,numFails[numFeatures/100],fabs(difference) > 35,fabs(difference));
 					if (drawAll || save || (draw&&(fabs(difference) > 35)))
 					{
-						if (fabs(difference) > 35) printf("DIFF: %i %i\n",(sumDev/histMax),-(offsetX[ims+numLocations*a]-offsetX[ims+numLocations*b]));
+						if (fabs(difference) > 35) printf("DIFF: %i %.1f\n",(sumDev/histMax),-(offsetX[ims+numLocations*a]-offsetX[ims+numLocations*b]));
 						Mat imA,imB,img_matches,img_matches_transposed;
 						vector<KeyPoint> kpA,kpB;
 						KeyPoint kp;

@@ -13,20 +13,17 @@ LDFLAGS :=  grief/grief.cpp -Llib -Wl,-rpath='$$ORIGIN/lib' -g `pkg-config openc
 # OpenCV
 #CFLAGS += `pkg-config opencv --cflags`
 
-all: match_all evolve_grief annotate
+all: match_all t-test
 
 match_all: match_all.cpp grief/grief.cpp 
 	$(CC) match_all.cpp $(CFLAGS) $(LDFLAGS) -o $@ 
 
-evolve_grief: evolve_grief.cpp grief/grief.cpp 
-	$(CC) evolve_grief.cpp $(CFLAGS) $(LDFLAGS) -o $@
- 
-annotate: annotate.cpp grief/grief.cpp 
-	$(CC) annotate.cpp $(CFLAGS) $(LDFLAGS) -o $@ 
+t-test: t-test.cpp 
+	$(CC) t-test.cpp -lalglib $(CFLAGS) -o $@ 
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE) 
-	rm -f match_all evolve_grief annotate 
+	rm -f match_all t-test
 
 cleanall:
 	rm -f *.o 

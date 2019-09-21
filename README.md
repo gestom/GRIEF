@@ -1,4 +1,4 @@
-# Datasets and code for ICRA 2020 submission number 1622 
+# Materials for ICRA 2020 submission number 1622 
 
 This page contains supporting materials for ICRA 2020 submission number 1622, which is currently in review.
 More info will be released once the review process is completed.
@@ -15,7 +15,7 @@ First, we provide a simple framework that allows to benchmark the feature extrac
  
 To analyse the results of the evaluation, you need to install a few additional libraries: 
 
-1. To do so, run the following commands: `sudo apt install gnuplot xfig transfig  libalglib-dev`
+1. To do so, run the following commands: `sudo apt install gnuplot xfig transfig  libalglib-dev imagemagick`
 
 ### OpenCV 
 
@@ -41,47 +41,29 @@ To download and prepare the evaluation tools:
  
 ## Dataset
 
+### Download
+ 
 The evaluation datasets can be obtained at links provided in the [dataset_link](https://raw.githubusercontent.com/gestom/GRIEF/style_transfer/dataset_link.txt)
-Just open any of the links provided in a browser, download and unzip the file so that the #stromovka# and #nclt# folders reside in the #grief# one 
-You should obtain the same
+Just open any of the links provided in a browser, download and unzip the file so that the *stromovka* and *nclt* folders reside in the *grief* folder. 
+The *stromovka* and *nclt* folders should contain both original images as described in Sections IV.ab of the paper.
 
+### Preprocessing 
 
-## Datasets
-
-The datasets we used for evaluation are available for download at my [google drive](https://drive.google.com/open?id=1EIsLjW8Z995wYPj3WJWYtURAAF9PgLvw) and at [L-CAS owncloud](https://lcas.lincoln.ac.uk/owncloud/shared/datasets/).
+To prepare the datasets for evaluation, run `./scripts/preprocess_dataset.sh`.
+This will restructure the datasets according to Section IV.c of the paper.
 
 ## Feature evaluation
 
 ### Testing the main program 
 
-1. Go to <i>tools</i> and compile the <i>match_all</i> utilily: <b>cd tools;make;cd ..</b>,
-1. Run <b>./tools/match_all DETECTOR DESCRIPTOR DATASET</b> to perform the evaluation of a single detector/descriptor combination (e.g. <b>./tools/match_all star brief GRIEF-dataset/michigan</b>),
-1. After the tests finishes, have a look in the <i>dataset/results/</i> directory for a <i>detector_descriptor.histogram</i> file (e.g. <i>GRIEF-datasets/michigan/results/up-surf_brief.histogram</i>),
-1. Run the benchmark on the provided dataset: <b>./scripts/match_all.sh DATASET</b>.
+1. Test the evaluation, e.g. by **./tools/match_all star brief nclt_01**, to perform the evaluation of a single detector/descriptor combination on a signe dataset
+1. After the test finishes, have a look in the *nclt_01/results/* folder to see the reports.
 
-### Running benchmarks 
+### Running the evaluations
 
-1. The first lines of the <i>detectors</i> and <i>descriptors</i> files in the <i>settings</i> folder contain the detectors and descriptors that will be used for the benchmark. You can select the detectors and descriptors for the benchmark by editing these files. Ty to modify the first line of the <i>settings/detectors</i> so that it contains <i>star up-sift</i>, and the first line of the <i>settings/descriptors</i> so that it contains <i>brief root-sift</i>.
-1. To run a benchmark of all detector/descriptor combinations: <b>./scripts/match_all.sh DATASET</b>. For example, running the <b>./scripts/match_all.sh GRIEF-datasets/michigan</b> with the files set according to the previous point will test four image features: <i>star+brief</i>, <i>star+root-sift</i>, <i>up-sift+brief</i> and <i>up-sift+root-sift</i> on the <i>GRIEF-datasets/michigan</i> dataset.
-1. To run a benchmark that will test the detector/descriptor pairs in a successive way, run <b>./scripts/match.sh DATASET</b>. That is, running the <b>./scripts/match.sh GRIEF-datasets/michigan</b> with the <i>settings/detectors</i> and <i>settings/descriptors</i> files set according to point 1 will test <i>star+brief</i> and <i>up-sift+root-sift</i> image features.
-
-### Evaluation of results
-1. The scripts, which evaluate the results obtained by running the benchmarks, evaluate the detectors and descriptors from the first lines of the files in the <i>settings</i> folder.
-1. Running <b>./scripts/benchmark_evolution.sh DATASET</b> evaluates every iteration of the GRIEF algorithm stored in the <i>grief_history</i> on a given DATASET.
-1. Running <b>./scripts/benchmark_precision.sh DATASET</b>  creates a latex-formatted table that contains the error rates of the detector/descriptor combinations. 
-1. Running <b>./scripts/draw.sh DATASET</b> draws the dependence of the heading estimation error on the number of features extracted and stores the results in <i>rates.fig</i> and <i>rates.pdf</i> files.
-
-## GRIEF training
-
-1. To initiate the training, you need to set the initial comparisons of the GRIEF feature. Either reset the GRIEF to be the same as BRIEF by <b>./scripts/resetGrief.sh</b> or switch to the GRIEF that was used in [[1](#references)] by running <b>./scripts/restoreGrief.sh</b>.
-1. Running <b>./scripts/evolveGrief.sh DATASET NUMBER</b> will evolve a NUMBER of GRIEF generations on DATATASET, e.g. <b>./scripts/evolveGrief.sh GRIEF-dataset/michigan 100</b>.
-1. Training will be speeded-up if you restrict the number of images by creating a smaller dataset just for training.
-1. To switch to an arbitrary GRIEF that was generated during the training, run <b>./scripts/restoreGrief.sh [grief_file]</b>. The <i>grief_files</i>  are in <i>grief_history</i> directory, which contains comparisons for the individual GRIEF generations and their fitness.
-
-## References
-1. T.Krajnik, P.Cristoforis, K. Kusumam, P.Neubert, T.Duckett: <b>[Image features for Visual Teach-and-Repeat Navigation in Changing Environments.](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_RAS_2016.pdf)</b> Journal of Robotics and Autonomous Systems, 2016 <i>[bibtex](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_RAS_2016.bib)</i>.
-1. T.Krajnik, P.Cristoforis, M.Nitsche, K. Kusumam, T.Duckett: <b>[Image features and seasons revisited.](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_ECMR_2015.pdf)</b> ECMR 2015. <i>[bibtex](https://github.com/gestom/GRIEF/blob/master/papers/GRIEF_ECMR_2015.bib)</i>.
+1. You can set the detectors and descriptors for testing in the relevant files in the *settings* folder.
+1. To run the benchmarks, simply run **./scripts/compute.sh**. This will process all the datasets with the required detector/descriptor combinations.
+1. To evaluate the results run **./scripts/summarise.sh**. This will run pairwise statistical t-tests and identify optimal detector/descriptor combinations.
 
 ## Acknowledgements
 This research is currently supported by the Czech Science Foundation project 17-27006Y _STRoLL_.
-It was also funded by the EU ICT project 600623 _STRANDS_.

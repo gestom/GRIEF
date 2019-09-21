@@ -1,30 +1,50 @@
-## Image Features for Visual Teach-and-Repeat Navigation in Changing Environments
+# Datasets and code for ICRA 2020 submission number 1622 
+
+This page contains supporting materials for ICRA 2020 submission number 1622, which is currently in review.
+More info will be released once the review process is completed.
+
+## Image Features and Style Transfer for Visual Teach-and-Repeat Navigation in Changing Environments
 
 This project adresses visual-based navigation of mobile robots in outdoor environments.
 In particular, we adress the robustness of image features to seasonal changes in outdoor environments.
-First, we provide a simple framework that allows to benchmark the feature extractors - so far, our benchmark was used by Peer Neubert, who showed that Superpixel Grids (SpG) and Convolutional Neural Networks (CNN) outperform other image features in terms of their robustness to seasonal changes. However, the CNN-based features are computationally expensive.
-So, in this project, we also provide an evolutionary algorithm that allows to train the BRIEF features to be robust to environmental changes.
-We call this feature GRIEF (Generated BRIEF).
-While this feature is slighly less robust that SpG/CNN, it's really fast to calculate. 
-The GRIEF feature and its evaluation is described in detail in a paper published in the <i>Journal of Robotics and Autonomous Systems</i> [[1](#references)] and it was also presented at European Conference on Mobile robotics [[2](#references)].
-
-[![Image features for Visual Teach-and-Repeat Navigation in Changing Environments](https://github.com/gestom/GRIEF/blob/master/papers/demo.jpg)](https://youtu.be/CEtGG01z4GE)
-<b>Click the picture to see a detailed explanation - make sure you have sound on.</b>
+First, we provide a simple framework that allows to benchmark the feature extractors and we also provide two datasets pre-processed with GAN-based style transfer.
 
 ## Dependencies
 
-The project itself depends on <i>openCV</i> and it uses the <i>openCV non-free</i> packages.
-To install the openCV-nonfree, type this in terminal:
+### Analythic tools 
+ 
+To analyse the results of the evaluation, you need to install a few additional libraries: 
 
-- sudo add-apt-repository --yes ppa:xqms/opencv-nonfree
-- sudo apt-get update 
-- sudo apt-get install libopencv-nonfree-dev
-- sudo apt-get install libopencv-dev
+1. To do so, run the following commands: `sudo apt install gnuplot xfig transfig  libalglib-dev`
 
-Moreover, it uses the <i>gnuplot</i> and <i>transfig</i> packages to draw the results.
-You can install those by:
+### OpenCV 
 
-- sudo apt-get install gnuplot xfig transfig 
+OpenCV has a weird policy towards some of the feature extraction methodsd.
+They were kept in separate and now you need to perform some additional steps to have it working.
+While there are a few other ways to have openCV running with all the necessary features used in our evaluation, the one here works for me.
+
+1. Create a folder to perform the compilation and switch to it: `mkdir ~/opencv;cd ~/opencv`
+1. Download opencv: `git clone -b 3.4 --single-branch https://github.com/opencv/opencv.git`
+1. Download opencv-contrib: `git clone -b 3.4 --single-branch https://github.com/opencv/opencv_contrib.git`
+1. Go to opencv folder, create a build folder and switch to it: `mkdir opencv/build;cd opencv/build`
+1. Tell opencv to compile with the contrib: `cmake -DOPENCV_ENABLE_NONFREE:BOOL=ON -DOPENCV_EXTRA_MODULES_PATH=~/opencv/opencv_contrib/modules ~/opencv/opencv`
+1. Compile it: `make -j5`.
+1. Install it: `sudo make install`
+
+## Prepare the evaluation framework
+
+To download and prepare the evaluation tools:
+1.  Clone the evaluation framework: `git clone -b style_transfer --single-branch https://github.com/gestom/grief.git`
+1.  Switch to the folder with evaluation tools: `cd grief/tools`
+1.  Compile the tools: `make`
+1.  Go back `cd ..`
+ 
+## Dataset
+
+The evaluation datasets can be obtained at links provided in the [dataset_link](https://raw.githubusercontent.com/gestom/GRIEF/style_transfer/dataset_link.txt)
+Just open any of the links provided in a browser, download and unzip the file so that the #stromovka# and #nclt# folders reside in the #grief# one 
+You should obtain the same
+
 
 ## Datasets
 

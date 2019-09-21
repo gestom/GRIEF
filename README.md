@@ -1,4 +1,4 @@
-# Datasets and code for ICRA 2020 submission number 1622 
+# Materials for ICRA 2020 submission number 1622 
 
 This page contains supporting materials for ICRA 2020 submission number 1622, which is currently in review.
 More info will be released once the review process is completed.
